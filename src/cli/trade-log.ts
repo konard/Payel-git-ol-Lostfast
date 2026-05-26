@@ -70,11 +70,23 @@ function displayRows(report: RunReport): Record<ColumnKey, string>[] {
     : [{ currency: '', tp: '', sl: '', entryPrice: '' }];
 }
 
-function rowLine(row: Record<ColumnKey, string>, widths: Record<ColumnKey, number>): string {
-  return `| ${columns.map(({ key }) => row[key].padEnd(widths[key])).join(' | ')} |`;
+function rowCells(row: Record<ColumnKey, string>, widths: Record<ColumnKey, number>): string[] {
+  return columns.map(({ key }) => ` ${row[key].padEnd(widths[key])} `);
 }
 
-/** Render a markdown-style trade log table for terminal and headless output. */
+function borderLine(
+  widths: Record<ColumnKey, number>,
+  chars: { left: string; join: string; right: string },
+): string {
+  const segments = columns.map(({ key }) => '─'.repeat(widths[key] + 2));
+  return `${chars.left}${segments.join(chars.join)}${chars.right}`;
+}
+
+function rowLine(row: Record<ColumnKey, string>, widths: Record<ColumnKey, number>): string {
+  return `│${rowCells(row, widths).join('│')}│`;
+}
+
+/** Render a terminal trade log table for interactive and headless output. */
 export function renderTradeLogLines(report: RunReport): string[] {
   const rows = displayRows(report);
   const widths = Object.fromEntries(
@@ -85,7 +97,9 @@ export function renderTradeLogLines(report: RunReport): string[] {
     Object.fromEntries(columns.map(({ key, label }) => [key, label])) as Record<ColumnKey, string>,
     widths,
   );
-  const separator = `|${columns.map(({ key }) => '-'.repeat(widths[key] + 2)).join('|')}|`;
+  const top = borderLine(widths, { left: '╭', join: '┬', right: '╮' });
+  const separator = borderLine(widths, { left: '├', join: '┼', right: '┤' });
+  const bottom = borderLine(widths, { left: '╰', join: '┴', right: '╯' });
 
-  return ['# Trade Log', '', header, separator, ...rows.map((row) => rowLine(row, widths))];
+  return ['Trade Log', top, header, separator, ...rows.map((row) => rowLine(row, widths)), bottom];
 }

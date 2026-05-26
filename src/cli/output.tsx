@@ -20,6 +20,7 @@ export type OutputItem =
 
 function RunView({ report, theme }: { report: RunReport; theme: CliTheme }): React.ReactElement {
   const lines = renderTradeLogLines(report);
+  const isTableBorder = (line: string) => line.startsWith('╭') || line.startsWith('├') || line.startsWith('╰');
 
   return (
     <Box flexDirection="column" marginY={1}>
@@ -27,7 +28,7 @@ function RunView({ report, theme }: { report: RunReport; theme: CliTheme }): Rea
         <Text
           key={`${index}:${line}`}
           bold={index === 0 || index === 2}
-          color={index === 0 ? theme.colors.accent : index === 3 ? theme.colors.muted : undefined}
+          color={index === 0 ? theme.colors.accent : isTableBorder(line) ? theme.colors.muted : undefined}
         >
           {line}
         </Text>
