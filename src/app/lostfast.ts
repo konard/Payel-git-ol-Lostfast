@@ -11,7 +11,7 @@ import {
   type NewsProgressListener,
 } from '../services/news-crawler.js';
 import { ALL_STRATEGIES } from '../strategies/registry.js';
-import { computeCrowdConsensus } from '../services/news-consensus.js';
+import { computeCrowdConsensus, type InstrumentConsensus } from '../services/news-consensus.js';
 
 export interface StatusReport {
   driver: string;
@@ -19,6 +19,13 @@ export interface StatusReport {
   latestRunId?: number;
   latestAnalytics: AnalyticsRow[];
   crowdConsensus?: import('../services/news-consensus.js').InstrumentConsensus[];
+}
+
+export interface CurrencyForecast {
+  symbol: string;
+  report: RunReport;
+  price: number | null;
+  newsConsensus: InstrumentConsensus[];
 }
 
 export interface PersistedNewsCrawlReport extends NewsCrawlReport {
@@ -95,6 +102,33 @@ export class Lostfast {
       },
       onProgress,
     );
+  }
+
+  /** `/currency` — run a full forecast for a single symbol, including news consensus. */
+  async forecastCurrency(symbol: string, onProgress?: ProgressListener): Promise<CurrencyForecast> {
+    const report = await this.pipeline.collect(
+      'update',
+      {
+        symbols: [symbol],
+        interval: this.config.interval,
+        limit: this.config.candleLimit,
+        accountBalance: this.config.accountBalance,
+      },
+      onProgress,
+    );
+
+    const lastAnalysis = report.symbols[0]?.analysis.analytics;
+    const price = lastAnalysis?.lastPrice ?? null;
+
+    const baseAsset = symbol.replace(/USDT$/, '').replace(/USD$/, '').replace(/BTC$/, '').replace(/ETH$/, '');
+    const allConsensus = await this.store.getNewsConsensus(200);
+    const currencyNews = allConsensus.filter(
+      (c) =>
+        c.instrument.toUpperCase() === baseAsset.toUpperCase() ||
+        c.instrument.toUpperCase() === symbol.toUpperCase(),
+    );
+
+    return { symbol, report, price, newsConsensus: currencyNews };
   }
 
   /** `/clear` — prune outdated runs; the general search table is preserved. */
