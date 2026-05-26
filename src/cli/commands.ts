@@ -13,6 +13,7 @@ export const COMMANDS: CommandSpec[] = [
   { name: '/strategies', summary: 'List every available strategy' },
   { name: '/theme', summary: 'Open the theme selector or switch CLI colour themes' },
   { name: '/exchange', summary: 'Select target exchange (Binance, OKX, Bybit, MEXC)' },
+  { name: '/operating-mode', summary: 'Select trading timeframe (1m, 5m, 10m, 15m, 20m, 30m, 1h)' },
   { name: '/api', summary: 'Show the in-process GraphQL API endpoint' },
   { name: '/help', summary: 'Show this help' },
   { name: '/exit', summary: 'Quit Lostfast (aliases: /quit, Ctrl+C)' },
@@ -27,6 +28,7 @@ export type CommandName =
   | 'strategies'
   | 'theme'
   | 'exchange'
+  | 'operating-mode'
   | 'api'
   | 'help'
   | 'exit'
@@ -51,6 +53,7 @@ export function parseCommand(raw: string): ParsedCommand {
     case 'strategies':
     case 'theme':
     case 'exchange':
+    case 'operating-mode':
     case 'api':
     case 'help':
       return { name: token, token, args };

@@ -60,6 +60,10 @@ export class Lostfast {
     (this as any).pipeline = new CollectionPipeline(this.store, market);
   }
 
+  setInterval(interval: string): void {
+    (this.config as any).interval = interval;
+  }
+
   get driver(): string {
     return this.handle.driver;
   }

@@ -263,7 +263,7 @@ export class SyntheticMarketData implements MarketDataSource {
 }
 
 function intervalMinutes(interval: string): number {
-  const map: Record<string, number> = { '1m': 1, '5m': 5, '15m': 15, '1h': 60, '4h': 240, '1d': 1440 };
+  const map: Record<string, number> = { '1m': 1, '5m': 5, '10m': 10, '15m': 15, '20m': 20, '30m': 30, '1h': 60, '4h': 240, '1d': 1440 };
   return map[interval] ?? 60;
 }
 
@@ -277,19 +277,19 @@ function coinGeckoId(symbol: string): string {
 }
 
 function toMexcInterval(interval: string): string {
-  const map: Record<string, string> = { '1m': '1m', '5m': '5m', '15m': '15m', '1h': '60m', '4h': '4h', '1d': '1d' };
+  const map: Record<string, string> = { '1m': '1m', '5m': '5m', '15m': '15m', '30m': '30m', '1h': '60m', '4h': '4h', '1d': '1d' };
   return map[interval] ?? '60m';
 }
 
 function toBybitInterval(interval: string): string {
   // Bybit v5: 1,3,5,15,30,60,120,240,360,720,D,W,M
-  const map: Record<string, string> = { '1m': '1', '5m': '5', '15m': '15', '1h': '60', '4h': '240', '1d': 'D' };
+  const map: Record<string, string> = { '1m': '1', '5m': '5', '15m': '15', '30m': '30', '1h': '60', '4h': '240', '1d': 'D' };
   return map[interval] ?? '60';
 }
 
 function toOkxBar(interval: string): string {
   // OKX: 1m,5m,15m,30m,1H,4H,1D,1W,1M
-  const map: Record<string, string> = { '1m': '1m', '5m': '5m', '15m': '15m', '1h': '1H', '4h': '4H', '1d': '1D' };
+  const map: Record<string, string> = { '1m': '1m', '5m': '5m', '15m': '15m', '30m': '30m', '1h': '1H', '4h': '4H', '1d': '1D' };
   return map[interval] ?? '1H';
 }
 

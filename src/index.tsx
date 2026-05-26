@@ -13,7 +13,8 @@ import { renderBannerArt } from './cli/ascii.js';
 import { COMMANDS, parseCommand } from './cli/commands.js';
 import { getTheme, themeGradient, themeNames, type ThemeName } from './cli/theme.js';
 import { getExchange, exchangeNames, type ExchangeName } from './cli/exchanges.js';
-import { loadPreferences, saveTheme, saveExchange } from './cli/preferences.js';
+import { getInterval, intervalNames } from './cli/intervals.js';
+import { loadPreferences, saveTheme, saveExchange, saveInterval } from './cli/preferences.js';
 import { renderTradeLogLines } from './cli/trade-log.js';
 import { loadConfig } from './config.js';
 
@@ -70,6 +71,18 @@ async function runHeadless(command: string): Promise<number> {
       await saveExchange(ex.name as ExchangeName);
     }
     process.stdout.write(args[0] ? `Exchange: ${ex.label}\n` : `Exchanges: ${exchangeNames().join(', ')}\n`);
+    return 0;
+  }
+  if (name === 'operating-mode') {
+    const iv = getInterval(args[0]);
+    if (args[0] && iv.name !== args[0].toLowerCase()) {
+      process.stderr.write(`Unknown timeframe "${args[0]}". Available: ${intervalNames().join(', ')}\n`);
+      return 1;
+    }
+    if (args[0]) {
+      await saveInterval(iv.name as import('./cli/intervals.js').IntervalName);
+    }
+    process.stdout.write(args[0] ? `Trading timeframe: ${iv.label}\n` : `Timeframes: ${intervalNames().join(', ')}\n`);
     return 0;
   }
   if (name === 'exit') return 0;
@@ -145,7 +158,8 @@ async function main(): Promise<void> {
   const baseConfig = loadConfig();
   const effectiveTheme = saved.theme ?? baseConfig.theme;
   const effectiveExchange = saved.exchange ?? baseConfig.exchange;
-  const config = loadConfig({ theme: effectiveTheme, exchange: effectiveExchange });
+  const effectiveInterval = saved.interval ?? baseConfig.interval;
+  const config = loadConfig({ theme: effectiveTheme, exchange: effectiveExchange, interval: effectiveInterval });
   const app = await Lostfast.create(config);
   const backend = config.apiEnabled
     ? await startLostfastBackend(app, { host: config.apiHost, port: config.apiPort })

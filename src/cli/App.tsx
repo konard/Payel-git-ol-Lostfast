@@ -6,9 +6,10 @@ import React, { useCallback, useRef, useState } from 'react';
 import type { Lostfast } from '../app/lostfast.js';
 import { COMMANDS, completeCommand, parseCommand, suggestCommands, type CommandSpec } from './commands.js';
 import { OutputLine, type OutputItem } from './output.js';
-import { saveTheme, saveExchange } from './preferences.js';
+import { saveTheme, saveExchange, saveInterval } from './preferences.js';
 import { getTheme, themeNames, type CliTheme, type ThemeName } from './theme.js';
 import { getExchange, exchangeNames, type ExchangeName } from './exchanges.js';
+import { getInterval, intervalNames, type IntervalName } from './intervals.js';
 
 export interface AppProps {
   app: Lostfast;
@@ -88,6 +89,43 @@ function ExchangeSelector({
   );
 }
 
+function IntervalSelector({
+  theme,
+  selectedIndex,
+  current,
+}: {
+  theme: CliTheme;
+  selectedIndex: number;
+  current: IntervalName;
+}): React.ReactElement {
+  return (
+    <Box
+      flexDirection="column"
+      borderStyle="round"
+      borderColor={theme.colors.border}
+      paddingX={1}
+      marginTop={1}
+    >
+      <Text bold color={theme.colors.accent}>
+        Select trading timeframe
+      </Text>
+      {intervalNames().map((name, index) => {
+        const option = getInterval(name);
+        const selected = index === selectedIndex;
+        const isCurrent = option.name === current;
+
+        return (
+          <Text key={name} color={selected ? theme.colors.info : undefined}>
+            {selected ? '> ' : '  '}
+            <Text bold={selected}>{option.label.padEnd(10)}</Text>
+            {isCurrent ? <Text color={theme.colors.muted}> current</Text> : null}
+          </Text>
+        );
+      })}
+    </Box>
+  );
+}
+
 /**
  * The interactive shell. A static banner and transcript scroll above a single
  * input line — the same layout as the Gemini CLI. All side effects go through
@@ -107,6 +145,9 @@ export function App({ app, version, apiUrl }: AppProps): React.ReactElement {
   const [exchangeSelectorOpen, setExchangeSelectorOpen] = useState(false);
   const [selectedExchangeIndex, setSelectedExchangeIndex] = useState(0);
   const [exchange, setExchange] = useState<ExchangeName>(() => getExchange(app.config.exchange).name as ExchangeName);
+  const [intervalSelectorOpen, setIntervalSelectorOpen] = useState(false);
+  const [selectedIntervalIndex, setSelectedIntervalIndex] = useState(0);
+  const [interval, setInterval] = useState<IntervalName>(() => getInterval(app.config.interval).name as IntervalName);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState<{ message: string; step: number; totalSteps: number } | null>(null);
   const nextId = useRef(1);
@@ -139,6 +180,12 @@ export function App({ app, version, apiUrl }: AppProps): React.ReactElement {
     setExchangeSelectorOpen(true);
   }, [exchange]);
 
+  const openIntervalSelector = useCallback(() => {
+    const currentIndex = intervalNames().findIndex((name) => name === interval);
+    setSelectedIntervalIndex(currentIndex >= 0 ? currentIndex : 0);
+    setIntervalSelectorOpen(true);
+  }, [interval]);
+
   const applyTheme = useCallback(
     (name: ThemeName) => {
       const next = getTheme(name);
@@ -158,6 +205,18 @@ export function App({ app, version, apiUrl }: AppProps): React.ReactElement {
       void saveExchange(next.name as ExchangeName);
       app.setExchange(next.name);
       push({ kind: 'text', text: `Exchange: ${next.label} (live data source updated)`, color: theme.colors.info });
+    },
+    [app, push, theme],
+  );
+
+  const applyInterval = useCallback(
+    (name: IntervalName) => {
+      const next = getInterval(name);
+      setInterval(next.name as IntervalName);
+      setIntervalSelectorOpen(false);
+      void saveInterval(next.name as IntervalName);
+      app.setInterval(next.name);
+      push({ kind: 'text', text: `Trading timeframe: ${next.label}`, color: theme.colors.info });
     },
     [app, push, theme],
   );
@@ -185,6 +244,19 @@ export function App({ app, version, apiUrl }: AppProps): React.ReactElement {
         setSelectedExchangeIndex((index) => (index + 1) % exchangeNames().length);
       } else if (key.return) {
         applyExchange(exchangeNames()[selectedExchangeIndex]);
+      }
+      return;
+    }
+
+    if (intervalSelectorOpen && !busy) {
+      if (key.escape) {
+        setIntervalSelectorOpen(false);
+      } else if (key.upArrow) {
+        setSelectedIntervalIndex((index) => (index - 1 + intervalNames().length) % intervalNames().length);
+      } else if (key.downArrow) {
+        setSelectedIntervalIndex((index) => (index + 1) % intervalNames().length);
+      } else if (key.return) {
+        applyInterval(intervalNames()[selectedIntervalIndex]);
       }
       return;
     }
@@ -265,6 +337,22 @@ export function App({ app, version, apiUrl }: AppProps): React.ReactElement {
         push({ kind: 'text', text: `Exchange: ${next.label} (live data source updated)`, color: theme.colors.info });
         return;
       }
+      if (name === 'operating-mode') {
+        if (args.length === 0) {
+          openIntervalSelector();
+          return;
+        }
+        const next = getInterval(args[0]);
+        if (next.name !== args[0].toLowerCase()) {
+          push({ kind: 'error', text: `Unknown timeframe "${args[0]}". Available: ${intervalNames().join(', ')}` });
+          return;
+        }
+        setInterval(next.name as IntervalName);
+        void saveInterval(next.name as IntervalName);
+        app.setInterval(next.name);
+        push({ kind: 'text', text: `Trading timeframe: ${next.label}`, color: theme.colors.info });
+        return;
+      }
       if (name === 'strategies') {
         push({ kind: 'strategies', list: app.strategies() });
         return;
@@ -300,7 +388,7 @@ export function App({ app, version, apiUrl }: AppProps): React.ReactElement {
         setProgress(null);
       }
     },
-    [apiUrl, app, openThemeSelector, openExchangeSelector, push, quit, theme],
+    [apiUrl, app, openThemeSelector, openExchangeSelector, openIntervalSelector, push, quit, theme],
   );
 
   const onSubmit = useCallback(
@@ -337,6 +425,8 @@ export function App({ app, version, apiUrl }: AppProps): React.ReactElement {
             <ThemeSelector theme={theme} selectedIndex={selectedThemeIndex} />
           ) : exchangeSelectorOpen ? (
             <ExchangeSelector theme={theme} selectedIndex={selectedExchangeIndex} current={exchange} />
+          ) : intervalSelectorOpen ? (
+            <IntervalSelector theme={theme} selectedIndex={selectedIntervalIndex} current={interval} />
           ) : (
             <>
               <Box>
