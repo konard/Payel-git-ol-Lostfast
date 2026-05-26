@@ -1,13 +1,13 @@
 import type { Strategy } from '../strategy.js';
 import { closes, lastCandle } from '../../domain/candle.js';
 import { neutral } from '../../domain/signal.js';
-import { lastDefined, sma } from '../indicators.js';
+import { atr, lastDefined, sma } from '../indicators.js';
 import { makeSignal } from '../helpers.js';
 
 /**
- * Pullback: in an established trend (price vs SMA-20), enter on a shallow
- * retracement against the trend, which offers a better risk/reward entry than
- * chasing the extreme.
+ * Pullback: in an established trend (price vs SMA-20), enter on a volatility-adjusted
+ * retracement (0.7\u20132.8 ATR from recent swing high/low). This replaces the old
+ * hard-coded 1.5% which failed across different volatility regimes.
  */
 export const pullback: Strategy = {
   id: 'pullback',
@@ -21,17 +21,20 @@ export const pullback: Strategy = {
     const price = closes(candles);
     const current = price[price.length - 1];
     const smaValue = lastDefined(sma(price, 20));
-    const window = candles.slice(-8);
+    const atrVal = lastDefined(atr(candles, 14)) || current * 0.01;
+    const window = candles.slice(-12);
 
     if (current > smaValue) {
       const recentHigh = Math.max(...window.map((c) => c.high));
-      if (current < recentHigh * 0.985) {
-        return makeSignal(this.id, symbol, at, 'long', 0.7, 'Pullback within an uptrend — entry zone');
+      const retracement = recentHigh - current;
+      if (retracement >= atrVal * 0.7 && retracement <= atrVal * 2.8) {
+        return makeSignal(this.id, symbol, at, 'long', 0.72, 'ATR-adjusted pullback in uptrend \u2014 entry zone');
       }
     } else if (current < smaValue) {
       const recentLow = Math.min(...window.map((c) => c.low));
-      if (current > recentLow * 1.015) {
-        return makeSignal(this.id, symbol, at, 'short', 0.7, 'Pullback within a downtrend — entry zone');
+      const retracement = current - recentLow;
+      if (retracement >= atrVal * 0.7 && retracement <= atrVal * 2.8) {
+        return makeSignal(this.id, symbol, at, 'short', 0.72, 'ATR-adjusted pullback in downtrend \u2014 entry zone');
       }
     }
     return makeSignal(this.id, symbol, at, 'neutral', 0.35, 'No clean pullback setup');

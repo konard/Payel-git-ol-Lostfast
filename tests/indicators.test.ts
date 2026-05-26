@@ -9,6 +9,7 @@ import {
   linearRegressionSlope,
   macd,
   rsi,
+  sessionVwap,
   sma,
   trueRange,
   vwap,
@@ -93,6 +94,25 @@ describe('VWAP', () => {
   it('equals the constant typical price for a flat series', () => {
     const candles = Array.from({ length: 10 }, () => flat(100, 0));
     expect(lastDefined(vwap(candles))).toBeCloseTo(100, 6);
+  });
+});
+
+describe('sessionVwap (daily reset)', () => {
+  it('resets accumulation at UTC day boundary', () => {
+    const day0 = 1_700_000_000_000; // some timestamp
+    const day1 = day0 + 86_400_000;
+    const candles: Candle[] = [
+      { openTime: day0, open: 100, high: 101, low: 99, close: 100, volume: 10 },
+      { openTime: day0 + 60_000, open: 100, high: 102, low: 100, close: 101, volume: 20 },
+      { openTime: day1, open: 105, high: 106, low: 104, close: 105, volume: 30 }, // new day
+      { openTime: day1 + 60_000, open: 105, high: 107, low: 105, close: 106, volume: 40 },
+    ];
+    const result = sessionVwap(candles);
+    // On day 0 the VWAP should be the weighted average of first two bars
+    expect(result[1]).toBeCloseTo(100.6667, 3);
+    // On day 1 it must start fresh (not contaminated by day 0 volume)
+    expect(result[3]).toBeGreaterThan(105); // typical of day-1 bars only
+    expect(result[3]).toBeLessThan(106.5);
   });
 });
 

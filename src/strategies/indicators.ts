@@ -194,6 +194,32 @@ export function vwap(candles: readonly Candle[]): number[] {
   return out;
 }
 
+/**
+ * Daily session VWAP that resets at each UTC day boundary.
+ * Correct for intraday mean-reversion when the candle series spans multiple days.
+ * Each bar uses VWAP accumulated from the start of its own UTC day.
+ */
+export function sessionVwap(candles: readonly Candle[]): number[] {
+  const out = new Array<number>(candles.length).fill(NaN);
+  let cumPV = 0;
+  let cumV = 0;
+  let currentDay = -1;
+
+  for (let i = 0; i < candles.length; i++) {
+    const day = Math.floor(candles[i].openTime / 86_400_000); // UTC day index
+    if (day !== currentDay) {
+      cumPV = 0;
+      cumV = 0;
+      currentDay = day;
+    }
+    const typical = (candles[i].high + candles[i].low + candles[i].close) / 3;
+    cumPV += typical * candles[i].volume;
+    cumV += candles[i].volume;
+    out[i] = cumV === 0 ? typical : cumPV / cumV;
+  }
+  return out;
+}
+
 export interface DonchianChannel {
   upper: number[];
   lower: number[];
