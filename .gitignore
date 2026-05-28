@@ -5,7 +5,7 @@ node_modules/
 dist/
 
 # Embedded PGlite data directory
-.lostfast/
+.tradefast/
 
 # Environment
 .env

@@ -32,8 +32,13 @@ interactive terminal UI.
 - **Drizzle ORM** on PostgreSQL — runs on an **embedded PGlite** database with
   zero configuration, or on a real PostgreSQL server via `DATABASE_URL`.
 - **Interactive command set with precise lifecycle rules**: `/start`, `/update`,
-  `/backtest`, `/news`, `/clear`, `/status`, `/strategies`, `/theme`,
-  `/operating-mode`, `/api`, `/help`, `/exit`.
+  `/backtest`, `/news`, `/clear`, `/clear-chat`, `/status`, `/strategies`, `/theme`,
+  `/exchange`, `/currency`, `/operating-mode`, `/operating-mode-time`,
+  `/serching-level`, `/serching-platforms`, `/ratings`, `/api`, `/help`, `/exit`.
+- **Source credibility ratings**: `/ratings` shows all 30 sources ranked by
+  credibility score. Adjust ratings with `/ratings correct` / `incorrect` /
+  `loud-claim` or a numeric grade (`/ratings "Хабр" -1`). AI can modify ratings
+  via the `run_ratings_adjust` tool on user feedback.
 - **Selectable operating modes**: `/operating-mode` opens a pop-up to switch the
   trading style between **long-term**, **medium-term** and **scalping**, so the
   platform is no longer locked to a single horizon.
@@ -111,7 +116,10 @@ TRADEFAST_MARKET_SOURCE=synthetic TRADEFAST_DATA_DIR=:memory: node dist/index.js
 | `/operating-mode-time [tf]` | Open the timeframe selector, or set it directly (`1m`–`1d`) to fine-tune within the current mode. |
 | `/serching-level [level]` | Set crawl depth/resolution: `normal` (fast, depth 2), `high` (deep, depth 4), or `max` (full graph, depth 8 with comment traversal). Opens a pop-up without argument. |
 | `/serching-platforms` | Toggle source groups on/off: economic calendars, news portals, Reddit communities, exchange communities. Opens a multi-select pop-up. |
+| `/currency [symbol]` | Run a full forecast for a single symbol with news sentiment and price chart. |
 | `/exchange` | Swap the asset being researched — opens a pop-up to select from trading symbols. |
+| `/ratings` | Show source credibility ratings. Subcommands: `correct`, `incorrect`, `loud-claim`, or a numeric grade (`/ratings "Хабр" -1`). |
+| `/clear-chat` | Clear the chat transcript and reset AI conversation history. |
 | `/api`         | Show the in-process GraphQL endpoint.                                        |
 | `/help`        | Show the command list.                                                       |
 | `/exit`        | Quit (aliases: `/quit`, `/q`, `Esc`, `Ctrl+C`).                              |
@@ -238,7 +246,7 @@ All configuration is environment-driven (see `.env.example`):
 | Variable                  | Default                       | Purpose                                                        |
 | ------------------------- | ----------------------------- | -------------------------------------------------------------- |
 | `DATABASE_URL`            | _(unset → PGlite)_            | PostgreSQL connection string. Unset uses embedded PGlite.      |
-| `TRADEFAST_DATA_DIR`       | `.Tradefast/pgdata`            | PGlite data directory (`:memory:` for ephemeral).              |
+| `TRADEFAST_DATA_DIR`       | `.tradefast/pgdata`            | PGlite data directory (`:memory:` for ephemeral).              |
 | `TRADEFAST_MARKET_SOURCE`  | `resilient`                   | `resilient` \| `live` \| `binance` \| `coingecko` \| `mexc` \| `synthetic`. |
 | `TRADEFAST_MARKET_API`     | `https://api.binance.com`     | Binance REST base URL.                                         |
 | `TRADEFAST_COINGECKO_API`  | `https://api.coingecko.com`   | CoinGecko REST base URL.                                       |
@@ -320,12 +328,41 @@ Run it from the interactive shell or in one-shot mode:
 node dist/index.js news
 ```
 
-The crawler uses a lazy headless Chromium instance, scrolls each source page,
-extracts likely article/event links, then follows source-local event and article
-URLs within the configured depth/page budget. Detail pages are captured from
-their own heading/metadata/body text, URLs are normalized, and items are
-deduplicated by source and title. A failing source is recorded in the crawl
-report but does not stop the remaining sources; a failing child page is skipped.
+The crawler uses a lazy headless Chromium instance (or plain HTTP fallback when
+Playwright is not installed), scrolls each source page, extracts likely
+article/event links, then follows source-local event and article URLs within the
+configured depth/page budget. Detail pages are captured from their own
+heading/metadata/body text, URLs are normalized, and items are deduplicated by
+source and title. A failing source is recorded in the crawl report but does not
+stop the remaining sources; a failing child page is skipped.
+
+## Source Ratings
+
+Every research source tracked by the system has a credibility score between
+**0%** (untrusted) and **100%** (highly credible), starting at 100% by default.
+
+View ratings with:
+
+```bash
+/ratings
+```
+
+Output shows sources grouped by kind with colour-coded scores. Adjust ratings
+interactively:
+
+| Subcommand | Example | Effect |
+|---|---|---|
+| `correct <id>` | `/ratings correct investing-com` | +5% for a correct prediction |
+| `incorrect <id>` | `/ratings incorrect investing-com` | −10% for an incorrect prediction |
+| `loud-claim <id>` | `/ratings loud-claim investing-com` | −20% for a loud unsubstantiated claim |
+| `<grade>` | `/ratings "Хабр" -1` | Adjust by ±N% points (grade/100) |
+
+The AI assistant can also adjust ratings automatically via the
+`run_ratings_adjust(source, grade)` tool when you give feedback like
+*"Хабр плохой источник"* or *"понизь Хабр на 2"*.
+
+Scores are persisted in the `source_ratings` table and survive all lifecycle
+commands (`/start`, `/clear`). Sources inactive for >30 days decay by 5%.
 
 ---
 
@@ -352,14 +389,17 @@ failure the system degrades gracefully without interrupting the run.
 ### AI chat tools
 
 When the AI advisor mode is active and uses a chat-capable model, the system
-exposes two research tools to the AI:
+exposes these tools to the AI:
 
-- **`/serching-level`** — sets crawl depth/resolution. The AI can request
+- **`run_serching_level`** — sets crawl depth/resolution. The AI can request
   `normal` (fast, shallow), `high` (deep), or `max` (exhaustive) depending on
   how much context it needs.
-- **`/serching-platforms`** — enables/disables source groups. The AI can toggle
-  specific groups (e.g. enable only `economic-calendars` for fundamentals) to
-  tailor research scope.
+- **`run_serching_platforms`** — enables/disables source groups. The AI can
+  toggle specific groups (e.g. enable only `economic-calendars` for
+  fundamentals) to tailor research scope.
+- **`run_ratings_adjust`** — modifies a source's credibility rating. Parameters:
+  `source` (title or ID) and `grade` (integer, e.g. `-1` = −1%). Triggered by
+  user feedback like *"Хабр -1"* or *"понизь рейтинг Хабру"*.
 
 These tools are defined in `src/services/chat.ts` and are automatically
 registered when the chat service initializes.
