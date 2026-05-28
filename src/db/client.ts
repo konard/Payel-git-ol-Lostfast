@@ -16,10 +16,10 @@ import * as schema from './schema.js';
  * A driver-agnostic handle. Both drivers expose the identical query API, so the
  * repositories are written once against this type.
  */
-export type LostfastDb = NodePgDatabase<typeof schema>;
+export type TradefastDb = NodePgDatabase<typeof schema>;
 
 export interface DbHandle {
-  db: LostfastDb;
+  db: TradefastDb;
   /** Releases underlying resources (pool / PGlite instance). */
   close: () => Promise<void>;
   /** Which driver backs this handle. */
@@ -64,12 +64,12 @@ export async function createDb(options: CreateDbOptions = {}): Promise<DbHandle>
     return { db, driver: 'postgres', close: async () => void (await pool.end()) };
   }
 
-  const dataDir = options.dataDir ?? process.env.LOSTFAST_DATA_DIR ?? join('.lostfast', 'pgdata');
+  const dataDir = options.dataDir ?? process.env.TRADEFAST_DATA_DIR ?? join('.tradefast', 'pgdata');
   if (dataDir !== ':memory:') {
     await mkdir(dirname(resolve(dataDir)), { recursive: true });
   }
   const client = new PGlite(dataDir === ':memory:' ? undefined : dataDir);
-  const db = drizzlePglite(client, { schema }) as unknown as LostfastDb;
+  const db = drizzlePglite(client, { schema }) as unknown as TradefastDb;
   if (shouldMigrate) {
     await migratePglite(db as unknown as PgliteDatabase<typeof schema>, { migrationsFolder });
   }

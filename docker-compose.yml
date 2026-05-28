@@ -1,8 +1,8 @@
-# LØSTFΛST — Postgres + the analytics CLI.
+# TRADEFΛST — Postgres + the analytics CLI.
 #
 #   docker compose up -d db            # start PostgreSQL
-#   docker compose run --rm lostfast   # open the interactive CLI
-#   docker compose run --rm lostfast start    # run a one-shot collection
+#   docker compose run --rm Tradefast   # open the interactive CLI
+#   docker compose run --rm Tradefast start    # run a one-shot collection
 #
 # The CLI talks to the bundled Postgres via DATABASE_URL. Drizzle migrations are
 # applied automatically on first connect.
@@ -10,20 +10,20 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: lostfast
-      POSTGRES_PASSWORD: lostfast
-      POSTGRES_DB: lostfast
+      POSTGRES_USER: Tradefast
+      POSTGRES_PASSWORD: Tradefast
+      POSTGRES_DB: Tradefast
     ports:
       - '5432:5432'
     volumes:
-      - lostfast-pgdata:/var/lib/postgresql/data
+      - Tradefast-pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U lostfast -d lostfast']
+      test: ['CMD-SHELL', 'pg_isready -U Tradefast -d Tradefast']
       interval: 5s
       timeout: 5s
       retries: 10
 
-  lostfast:
+  Tradefast:
     build:
       context: .
       args:
@@ -33,15 +33,15 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgres://lostfast:lostfast@db:5432/lostfast
-      LOSTFAST_SYMBOLS: ${LOSTFAST_SYMBOLS:-BTCUSDT,ETHUSDT,SOLUSDT}
-      LOSTFAST_INTERVAL: ${LOSTFAST_INTERVAL:-1h}
-      LOSTFAST_MARKET_SOURCE: ${LOSTFAST_MARKET_SOURCE:-resilient}
-      LOSTFAST_AI_MODEL: ${LOSTFAST_AI_MODEL:-claude-opus-4-7}
+      DATABASE_URL: postgres://Tradefast:Tradefast@db:5432/Tradefast
+      TRADEFAST_SYMBOLS: ${TRADEFAST_SYMBOLS:-BTCUSDT,ETHUSDT,SOLUSDT}
+      TRADEFAST_INTERVAL: ${TRADEFAST_INTERVAL:-1h}
+      TRADEFAST_MARKET_SOURCE: ${TRADEFAST_MARKET_SOURCE:-resilient}
+      TRADEFAST_AI_MODEL: ${TRADEFAST_AI_MODEL:-claude-opus-4-7}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
     # Keep STDIN open and allocate a TTY so the interactive Ink UI renders.
     stdin_open: true
     tty: true
 
 volumes:
-  lostfast-pgdata:
+  Tradefast-pgdata:

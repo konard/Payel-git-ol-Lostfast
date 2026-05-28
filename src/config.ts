@@ -1,5 +1,5 @@
 /** Runtime configuration, resolved from environment variables with sane defaults. */
-export interface LostfastConfig {
+export interface TradefastConfig {
   symbols: string[];
   interval: string;
   candleLimit: number;
@@ -31,29 +31,29 @@ function envFlag(name: string, fallback: boolean): boolean {
   return !['0', 'false', 'off', 'no'].includes(value.trim().toLowerCase());
 }
 
-export function loadConfig(overrides: Partial<LostfastConfig> = {}): LostfastConfig {
-  const symbols = (process.env.LOSTFAST_SYMBOLS ?? '')
+export function loadConfig(overrides: Partial<TradefastConfig> = {}): TradefastConfig {
+  const symbols = (process.env.TRADEFAST_SYMBOLS ?? '')
     .split(',')
     .map((s) => s.trim().toUpperCase())
     .filter(Boolean);
 
   return {
     symbols: overrides.symbols ?? (symbols.length > 0 ? symbols : DEFAULT_SYMBOLS),
-    interval: overrides.interval ?? process.env.LOSTFAST_INTERVAL ?? '1h',
-    candleLimit: overrides.candleLimit ?? Number(process.env.LOSTFAST_CANDLE_LIMIT ?? 200),
-    accountBalance: overrides.accountBalance ?? Number(process.env.LOSTFAST_ACCOUNT_BALANCE ?? 10_000),
-    model: overrides.model ?? process.env.LOSTFAST_AI_MODEL ?? 'claude-opus-4-7',
-    theme: overrides.theme ?? process.env.LOSTFAST_THEME ?? 'violet',
-    exchange: overrides.exchange ?? process.env.LOSTFAST_EXCHANGE ?? 'bybit',
-    mode: overrides.mode ?? process.env.LOSTFAST_MODE ?? 'medium-term',
-    searchingLevel: overrides.searchingLevel ?? process.env.LOSTFAST_SEARCHING_LEVEL ?? 'normal',
+    interval: overrides.interval ?? process.env.TRADEFAST_INTERVAL ?? '1h',
+    candleLimit: overrides.candleLimit ?? Number(process.env.TRADEFAST_CANDLE_LIMIT ?? 200),
+    accountBalance: overrides.accountBalance ?? Number(process.env.TRADEFAST_ACCOUNT_BALANCE ?? 10_000),
+    model: overrides.model ?? process.env.TRADEFAST_AI_MODEL ?? 'claude-opus-4-7',
+    theme: overrides.theme ?? process.env.TRADEFAST_THEME ?? 'violet',
+    exchange: overrides.exchange ?? process.env.TRADEFAST_EXCHANGE ?? 'bybit',
+    mode: overrides.mode ?? process.env.TRADEFAST_MODE ?? 'medium-term',
+    searchingLevel: overrides.searchingLevel ?? process.env.TRADEFAST_SEARCHING_LEVEL ?? 'normal',
     searchingPlatforms: overrides.searchingPlatforms ?? (
-      process.env.LOSTFAST_SEARCHING_PLATFORMS
-        ? process.env.LOSTFAST_SEARCHING_PLATFORMS.split(',').map(s => s.trim()).filter(Boolean)
+      process.env.TRADEFAST_SEARCHING_PLATFORMS
+        ? process.env.TRADEFAST_SEARCHING_PLATFORMS.split(',').map(s => s.trim()).filter(Boolean)
         : ['economic-calendars', 'news-portals', 'reddit-communities', 'exchange-communities']
     ),
-    apiEnabled: overrides.apiEnabled ?? envFlag('LOSTFAST_API', true),
-    apiHost: overrides.apiHost ?? process.env.LOSTFAST_API_HOST ?? '127.0.0.1',
-    apiPort: overrides.apiPort ?? Number(process.env.LOSTFAST_API_PORT ?? 0),
+    apiEnabled: overrides.apiEnabled ?? envFlag('TRADEFAST_API', true),
+    apiHost: overrides.apiHost ?? process.env.TRADEFAST_API_HOST ?? '127.0.0.1',
+    apiPort: overrides.apiPort ?? Number(process.env.TRADEFAST_API_PORT ?? 0),
   };
 }

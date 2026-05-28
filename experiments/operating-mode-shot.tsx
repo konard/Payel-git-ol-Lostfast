@@ -12,7 +12,7 @@ import React from 'react';
 import { render } from 'ink-testing-library';
 import { chromium } from 'playwright';
 
-import type { Lostfast } from '../src/app/lostfast.js';
+import type { Tradefast } from '../src/app/tradefast.js';
 import { App } from '../src/cli/App.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -38,7 +38,7 @@ const fakeApp = {
   setInterval: () => {},
   setMode: () => {},
   strategies: () => [],
-} as unknown as Lostfast;
+} as unknown as Tradefast;
 
 // --- Minimal ANSI SGR -> HTML converter (ported from shot.mjs) -------------
 const NAMED: Record<number, string> = {

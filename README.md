@@ -1,15 +1,15 @@
-# LØSTFΛST
+# TRADEFΛST
 
 > A disciplined crypto market-research CLI — strategies, analytics, risk and
 > AI-assisted research — in the style of the [Gemini CLI](https://github.com/google-gemini/gemini-cli).
 
-LØSTFΛST fetches OHLCV candles, runs **13 trading strategies** over them,
+TRADEFΛST fetches OHLCV candles, runs **13 trading strategies** over them,
 sizes positions with volatility-aware risk management, indexes a knowledge base,
 optionally scrapes references and crawls market news with Playwright, and
 narrates the result through a pluggable AI advisor — all from a polished
 interactive terminal UI.
 
-![LØSTFΛST CLI](docs/screenshots/cli.png)
+![TRADEFΛST CLI](docs/screenshots/cli.png)
 
 ---
 
@@ -90,7 +90,7 @@ node dist/index.js news       # crawl configured market news sources
 Want a fully deterministic, offline run? Use the synthetic market source:
 
 ```bash
-LOSTFAST_MARKET_SOURCE=synthetic LOSTFAST_DATA_DIR=:memory: node dist/index.js start
+TRADEFAST_MARKET_SOURCE=synthetic TRADEFAST_DATA_DIR=:memory: node dist/index.js start
 ```
 
 ---
@@ -122,22 +122,22 @@ accumulates discoveries across every session, exactly as required.
 Collected `news_items` also survive these lifecycle commands so news history can
 feed a future market-assessment model.
 
-While typing a command, Lostfast shows matching command suggestions. Press
+While typing a command, Tradefast shows matching command suggestions. Press
 `Tab` to complete an unambiguous command prefix. Run `/theme` to open the theme
 selector window, or pass a theme name for one-shot switching.
 
-![LØSTFΛST autocomplete](docs/screenshots/cli-autocomplete.png)
+![TRADEFΛST autocomplete](docs/screenshots/cli-autocomplete.png)
 
 ### Operating modes
 
-Lostfast is no longer locked to a single trading horizon. Run `/operating-mode`
+Tradefast is no longer locked to a single trading horizon. Run `/operating-mode`
 to open a pop-up and pick a trading style — **long-term**, **medium-term** or
 **scalping** — and the analysis timeframe shifts to match (daily, hourly or 5m
 candles, respectively). On first launch the pop-up opens automatically so you
 choose a style before starting; your choice is remembered across sessions. Use
 `/operating-mode-time` afterwards to fine-tune the exact timeframe within a mode.
 
-![LØSTFΛST operating-mode selector](docs/screenshots/cli-operating-mode.png)
+![TRADEFΛST operating-mode selector](docs/screenshots/cli-operating-mode.png)
 
 ---
 
@@ -238,32 +238,32 @@ All configuration is environment-driven (see `.env.example`):
 | Variable                  | Default                       | Purpose                                                        |
 | ------------------------- | ----------------------------- | -------------------------------------------------------------- |
 | `DATABASE_URL`            | _(unset → PGlite)_            | PostgreSQL connection string. Unset uses embedded PGlite.      |
-| `LOSTFAST_DATA_DIR`       | `.lostfast/pgdata`            | PGlite data directory (`:memory:` for ephemeral).              |
-| `LOSTFAST_MARKET_SOURCE`  | `resilient`                   | `resilient` \| `live` \| `binance` \| `coingecko` \| `mexc` \| `synthetic`. |
-| `LOSTFAST_MARKET_API`     | `https://api.binance.com`     | Binance REST base URL.                                         |
-| `LOSTFAST_COINGECKO_API`  | `https://api.coingecko.com`   | CoinGecko REST base URL.                                       |
-| `LOSTFAST_MEXC_API`       | `https://api.mexc.com`        | MEXC REST base URL.                                            |
-| `LOSTFAST_SYMBOLS`        | `BTCUSDT,ETHUSDT,SOLUSDT`     | Comma-separated symbols to analyse.                            |
-| `LOSTFAST_INTERVAL`       | `1h`                          | Candle interval.                                               |
-| `LOSTFAST_MODE`           | `medium-term`                 | Initial operating mode (`long-term`, `medium-term`, `scalping`). |
-| `LOSTFAST_CANDLE_LIMIT`   | `200`                         | Number of candles to fetch per symbol.                         |
-| `LOSTFAST_ACCOUNT_BALANCE`| `10000`                       | Account equity used for position sizing.                       |
-| `LOSTFAST_THEME`          | `violet`                      | Initial CLI theme.                                             |
-| `LOSTFAST_API`            | `1`                           | Start the in-process GraphQL API with the interactive CLI.      |
-| `LOSTFAST_API_HOST`       | `127.0.0.1`                   | GraphQL bind host.                                             |
-| `LOSTFAST_API_PORT`       | `0`                           | GraphQL bind port (`0` selects a free port).                    |
-| `LOSTFAST_SCRAPE`         | `0`                           | Set to `1` to enable the Playwright scraping pillar.           |
-| `LOSTFAST_NEWS_SOURCES_FILE` | `src/config/news-sources.json` | Optional custom JSON source list for `/news`.                |
-| `LOSTFAST_NEWS_LIMIT`     | `8`                           | Default max accepted items per source during `/news`.          |
-| `LOSTFAST_NEWS_DEPTH`     | `2`                           | Link depth for source-local event/article crawling.            |
-| `LOSTFAST_NEWS_PAGE_LIMIT`| `8`                           | Maximum pages to visit per configured news source.             |
-| `LOSTFAST_NEWS_LINKS_PER_PAGE` | `6`                      | Maximum follow-up links queued from one crawled page.          |
-| `LOSTFAST_AI_API_URL`     | `https://api.anthropic.com/v1/messages` | OpenAI-compatible endpoint for AI corrections.               |
-| `LOSTFAST_AI_API_KEY`     | _(unset → heuristic)_        | API key (falls back to `ANTHROPIC_API_KEY`).                    |
-| `LOSTFAST_AI_MODEL`       | `claude-4.7-opus`             | Model for per-symbol advice and cross-symbol correction.        |
-| `LOSTFAST_SKIP_AI_VALIDATION` | `0`                        | Set to `1` to skip the cross-symbol AI correction step.        |
-| `LOSTFAST_SEARCHING_LEVEL`| _(unset → pop-up)_           | Preset depth: `normal`, `high`, or `max`. Skips the pop-up.     |
-| `LOSTFAST_SEARCHING_PLATFORMS` | _(unset → pop-up)_      | Comma-separated source groups to enable (e.g. `news-portals,reddit-communities`). Skips the pop-up. |
+| `TRADEFAST_DATA_DIR`       | `.Tradefast/pgdata`            | PGlite data directory (`:memory:` for ephemeral).              |
+| `TRADEFAST_MARKET_SOURCE`  | `resilient`                   | `resilient` \| `live` \| `binance` \| `coingecko` \| `mexc` \| `synthetic`. |
+| `TRADEFAST_MARKET_API`     | `https://api.binance.com`     | Binance REST base URL.                                         |
+| `TRADEFAST_COINGECKO_API`  | `https://api.coingecko.com`   | CoinGecko REST base URL.                                       |
+| `TRADEFAST_MEXC_API`       | `https://api.mexc.com`        | MEXC REST base URL.                                            |
+| `TRADEFAST_SYMBOLS`        | `BTCUSDT,ETHUSDT,SOLUSDT`     | Comma-separated symbols to analyse.                            |
+| `TRADEFAST_INTERVAL`       | `1h`                          | Candle interval.                                               |
+| `TRADEFAST_MODE`           | `medium-term`                 | Initial operating mode (`long-term`, `medium-term`, `scalping`). |
+| `TRADEFAST_CANDLE_LIMIT`   | `200`                         | Number of candles to fetch per symbol.                         |
+| `TRADEFAST_ACCOUNT_BALANCE`| `10000`                       | Account equity used for position sizing.                       |
+| `TRADEFAST_THEME`          | `violet`                      | Initial CLI theme.                                             |
+| `TRADEFAST_API`            | `1`                           | Start the in-process GraphQL API with the interactive CLI.      |
+| `TRADEFAST_API_HOST`       | `127.0.0.1`                   | GraphQL bind host.                                             |
+| `TRADEFAST_API_PORT`       | `0`                           | GraphQL bind port (`0` selects a free port).                    |
+| `TRADEFAST_SCRAPE`         | `0`                           | Set to `1` to enable the Playwright scraping pillar.           |
+| `TRADEFAST_NEWS_SOURCES_FILE` | `src/config/news-sources.json` | Optional custom JSON source list for `/news`.                |
+| `TRADEFAST_NEWS_LIMIT`     | `8`                           | Default max accepted items per source during `/news`.          |
+| `TRADEFAST_NEWS_DEPTH`     | `2`                           | Link depth for source-local event/article crawling.            |
+| `TRADEFAST_NEWS_PAGE_LIMIT`| `8`                           | Maximum pages to visit per configured news source.             |
+| `TRADEFAST_NEWS_LINKS_PER_PAGE` | `6`                      | Maximum follow-up links queued from one crawled page.          |
+| `TRADEFAST_AI_API_URL`     | `https://api.anthropic.com/v1/messages` | OpenAI-compatible endpoint for AI corrections.               |
+| `TRADEFAST_AI_API_KEY`     | _(unset → heuristic)_        | API key (falls back to `ANTHROPIC_API_KEY`).                    |
+| `TRADEFAST_AI_MODEL`       | `claude-4.7-opus`             | Model for per-symbol advice and cross-symbol correction.        |
+| `TRADEFAST_SKIP_AI_VALIDATION` | `0`                        | Set to `1` to skip the cross-symbol AI correction step.        |
+| `TRADEFAST_SEARCHING_LEVEL`| _(unset → pop-up)_           | Preset depth: `normal`, `high`, or `max`. Skips the pop-up.     |
+| `TRADEFAST_SEARCHING_PLATFORMS` | _(unset → pop-up)_      | Comma-separated source groups to enable (e.g. `news-portals,reddit-communities`). Skips the pop-up. |
 
 The market source falls back gracefully: `resilient` uses live Binance data and
 transparently switches to deterministic synthetic candles if the network is
@@ -279,7 +279,7 @@ The scraping pillar is **opt-in** so `/start` stays fast and fully offline by
 default. Enable it with:
 
 ```bash
-LOSTFAST_SCRAPE=1 node dist/index.js start
+TRADEFAST_SCRAPE=1 node dist/index.js start
 ```
 
 When enabled, it scrapes the top reference for each symbol into the `scrapes`
@@ -332,11 +332,11 @@ report but does not stop the remaining sources; a failing child page is skipped.
 ## AI advisor
 
 By default a deterministic local **heuristic advisor** narrates the analytics.
-When `LOSTFAST_AI_API_KEY` (or `ANTHROPIC_API_KEY`) is set, the system uses it
+When `TRADEFAST_AI_API_KEY` (or `ANTHROPIC_API_KEY`) is set, the system uses it
 in two places:
 
 1. **Per-symbol advice** — `LlmAdvisor` sends each symbol's analytics to the
-   configured model (`LOSTFAST_AI_MODEL`, default `claude-4.7-opus`) and stores
+   configured model (`TRADEFAST_AI_MODEL`, default `claude-4.7-opus`) and stores
    the summary. Falls back to heuristic on error.
 2. **Cross-symbol correction** — after all symbols are analysed, a single request
    sends all symbol data + news consensus to the AI. The AI returns a
@@ -372,8 +372,8 @@ Bring up PostgreSQL and the CLI with Docker Compose:
 
 ```bash
 docker compose up -d db                 # start PostgreSQL
-docker compose run --rm lostfast        # open the interactive CLI
-docker compose run --rm lostfast start  # one-shot collection
+docker compose run --rm Tradefast        # open the interactive CLI
+docker compose run --rm Tradefast start  # one-shot collection
 ```
 
 The CLI service connects to the bundled Postgres via `DATABASE_URL` and applies

@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from 'ink-testing-library';
 
-import type { Lostfast } from '../src/app/lostfast.js';
+import type { Tradefast } from '../src/app/tradefast.js';
 import { App } from '../src/cli/App.js';
 import { completeCommand, parseCommand, suggestCommands } from '../src/cli/commands.js';
 import { OutputLine } from '../src/cli/output.js';
@@ -35,7 +35,7 @@ const fakeApp = {
   setInterval: vi.fn(),
   setMode: vi.fn(),
   strategies: () => [{ id: 'trend-following', title: 'Trend Following' }],
-} as unknown as Lostfast;
+} as unknown as Tradefast;
 
 describe('command autocomplete', () => {
   it('suggests commands by partial slash input', () => {
@@ -133,7 +133,7 @@ describe('command autocomplete', () => {
     const tallStdout = { rows: 80, columns: 120, write: () => {}, on: () => {}, removeListener: () => {} } as any;
     const setMode = vi.fn();
     const setInterval = vi.fn();
-    const app = { ...fakeApp, setMode, setInterval } as unknown as Lostfast;
+    const app = { ...fakeApp, setMode, setInterval } as unknown as Tradefast;
     const { stdin, unmount } = render(
       <App app={app} version="0.0.0-test" apiUrl="http://127.0.0.1:8787/graphql" />,
       { stdout: tallStdout },

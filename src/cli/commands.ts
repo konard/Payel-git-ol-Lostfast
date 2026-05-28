@@ -10,6 +10,7 @@ export const COMMANDS: CommandSpec[] = [
   { name: '/backtest', summary: 'Replay history to measure forecast accuracy (win rate, expectancy)' },
   { name: '/news', summary: 'Crawl configured market news and economic-calendar sources' },
   { name: '/clear', summary: 'Prune outdated runs (the general search table is preserved)' },
+  { name: '/clear-chat', summary: 'Clear the chat transcript' },
   { name: '/status', summary: 'Show table counts and the latest run analytics' },
   { name: '/strategies', summary: 'List every available strategy' },
   { name: '/theme', summary: 'Open the theme selector or switch CLI colour themes' },
@@ -22,7 +23,7 @@ export const COMMANDS: CommandSpec[] = [
   { name: '/api', summary: 'Show the in-process GraphQL API endpoint' },
   { name: '/help', summary: 'Show this help' },
   { name: '/currency', summary: 'Select a specific currency for detailed forecast, news, and rate analysis' },
-  { name: '/exit', summary: 'Quit Lostfast (aliases: /quit, Ctrl+C)' },
+  { name: '/exit', summary: 'Quit Tradefast (aliases: /quit, Ctrl+C)' },
 ];
 
 export type CommandName =
@@ -31,6 +32,7 @@ export type CommandName =
   | 'backtest'
   | 'news'
   | 'clear'
+  | 'clear-chat'
   | 'status'
   | 'strategies'
   | 'theme'
@@ -62,6 +64,7 @@ export function parseCommand(raw: string): ParsedCommand {
     case 'backtest':
     case 'news':
     case 'clear':
+    case 'clear-chat':
     case 'status':
     case 'strategies':
     case 'theme':

@@ -7,6 +7,6 @@ export default defineConfig({
   out: './drizzle',
   dialect: 'postgresql',
   dbCredentials: {
-    url: process.env.DATABASE_URL ?? 'postgres://lostfast:lostfast@localhost:5432/lostfast',
+    url: process.env.DATABASE_URL ?? 'postgres://Tradefast:Tradefast@localhost:5432/Tradefast',
   },
 });

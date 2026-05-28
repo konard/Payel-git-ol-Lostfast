@@ -6,8 +6,8 @@ import { fileURLToPath } from 'node:url';
 
 import { render } from 'ink';
 
-import { Lostfast } from './app/lostfast.js';
-import { startLostfastBackend, type LostfastBackendHandle } from './backend/server.js';
+import { Tradefast } from './app/tradefast.js';
+import { startTradefastBackend, type TradefastBackendHandle } from './backend/server.js';
 import { App } from './cli/App.js';
 import { renderBannerArt } from './cli/ascii.js';
 import { COMMANDS, parseCommand } from './cli/commands.js';
@@ -30,7 +30,7 @@ function readVersion(): string {
     if (existsSync(file)) {
       try {
         const pkg = JSON.parse(readFileSync(file, 'utf8')) as { name?: string; version?: string };
-        if (pkg.name === 'lostfast') return pkg.version ?? '0.0.0';
+        if (pkg.name === 'Tradefast') return pkg.version ?? '0.0.0';
       } catch {
         // keep walking
       }
@@ -40,7 +40,7 @@ function readVersion(): string {
   return '0.0.0';
 }
 
-/** Non-interactive execution for scripts, CI and Docker (`lostfast <command>`). */
+/** Non-interactive execution for scripts, CI and Docker (`Tradefast <command>`). */
 async function runHeadless(command: string): Promise<number> {
   const { name, args } = parseCommand(command);
   if (name === 'unknown') {
@@ -48,7 +48,7 @@ async function runHeadless(command: string): Promise<number> {
     return 1;
   }
   if (name === 'help') {
-    const gradient = themeGradient(getTheme(process.env.LOSTFAST_THEME));
+    const gradient = themeGradient(getTheme(process.env.TRADEFAST_THEME));
     process.stdout.write(`${gradient(renderBannerArt())}\n\n`);
     for (const c of COMMANDS) process.stdout.write(`  ${c.name.padEnd(12)} ${c.summary}\n`);
     return 0;
@@ -138,11 +138,11 @@ async function runHeadless(command: string): Promise<number> {
   if (name === 'exit') return 0;
 
   const config = loadConfig(name === 'api' ? { apiEnabled: true } : {});
-  const app = await Lostfast.create(config);
-  let backend: LostfastBackendHandle | null = null;
+  const app = await Tradefast.create(config);
+  let backend: TradefastBackendHandle | null = null;
   try {
     if (name === 'api') {
-      backend = await startLostfastBackend(app, { host: config.apiHost, port: config.apiPort });
+      backend = await startTradefastBackend(app, { host: config.apiHost, port: config.apiPort });
       process.stdout.write(`GraphQL API: ${backend.url}\n`);
       await waitForShutdown();
     } else if (name === 'strategies') {
@@ -210,7 +210,7 @@ async function main(): Promise<void> {
 
   if (args.length > 0) {
     // Forward the whole invocation so argument-bearing commands (e.g.
-    // `lostfast operating-mode scalping`) reach their handlers intact.
+    // `Tradefast operating-mode scalping`) reach their handlers intact.
     process.exitCode = await runHeadless(args.join(' '));
     return;
   }
@@ -234,9 +234,9 @@ async function main(): Promise<void> {
     searchingLevel: effectiveSearchingLevel,
     searchingPlatforms: effectiveSearchingPlatforms,
   });
-  const app = await Lostfast.create(config);
+  const app = await Tradefast.create(config);
   const backend = config.apiEnabled
-    ? await startLostfastBackend(app, { host: config.apiHost, port: config.apiPort })
+    ? await startTradefastBackend(app, { host: config.apiHost, port: config.apiPort })
     : null;
   try {
     const { waitUntilExit } = render(

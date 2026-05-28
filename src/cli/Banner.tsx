@@ -29,7 +29,7 @@ export function Banner({ version, driver, model, theme, apiUrl }: BannerProps): 
       </Box>
       <Box marginTop={1}>
         <Text color={theme.colors.muted}>
-          Lostfast v{version} · disciplined trading analytics · db: {driver} · ai: {model} · api:{' '}
+          Tradefast v{version} · disciplined trading analytics · db: {driver} · ai: {model} · api:{' '}
           {apiUrl ?? 'off'}
         </Text>
       </Box>

@@ -1,7 +1,7 @@
 import { createDb, type DbHandle } from '../db/client.js';
-import { LostfastStore } from '../db/store.js';
+import { TradefastStore } from '../db/store.js';
 import type { AnalyticsRow } from '../db/store.js';
-import { loadConfig, type LostfastConfig } from '../config.js';
+import { loadConfig, type TradefastConfig } from '../config.js';
 import type { Candle } from '../domain/candle.js';
 import { CollectionPipeline, type CollectOptions, type ProgressListener, type RunReport } from '../pipeline/collector.js';
 import {
@@ -43,7 +43,7 @@ export interface PersistedNewsCrawlReport extends NewsCrawlReport {
   unchanged: number;
 }
 
-/** Options accepted by {@link Lostfast.backtest}. */
+/** Options accepted by {@link Tradefast.backtest}. */
 export interface BacktestRunOptions {
   /** Bars of warm-up history before the first forecast. */
   warmup?: number;
@@ -60,26 +60,26 @@ export type BacktestProgressListener = (event: { message: string; step: number; 
  * plus read-only status. Keeping this logic out of the UI means the same
  * behaviour backs both the interactive shell and the non-interactive subcommands.
  */
-export class Lostfast {
+export class Tradefast {
   private constructor(
     private readonly handle: DbHandle,
-    private readonly store: LostfastStore,
+    private readonly store: TradefastStore,
     private pipeline: CollectionPipeline,
     private readonly newsCrawler: NewsCrawler,
-    readonly config: LostfastConfig,
+    readonly config: TradefastConfig,
     private market: MarketDataSource,
     readonly ratingService: SourceRatingService,
   ) {}
 
-  static async create(config: LostfastConfig = loadConfig()): Promise<Lostfast> {
+  static async create(config: TradefastConfig = loadConfig()): Promise<Tradefast> {
     const handle = await createDb();
-    const store = new LostfastStore(handle.db);
+    const store = new TradefastStore(handle.db);
     const market = createResilientMarketSourceFor(config.exchange);
     const pipeline = new CollectionPipeline(store, market);
     const newsCrawler = await createNewsCrawler();
     const ratingService = new SourceRatingService(store);
     await ratingService.seedSources(newsCrawler.sources);
-    return new Lostfast(handle, store, pipeline, newsCrawler, config, market, ratingService);
+    return new Tradefast(handle, store, pipeline, newsCrawler, config, market, ratingService);
   }
 
   /** Updates the exchange used for market data on subsequent /start and /update.

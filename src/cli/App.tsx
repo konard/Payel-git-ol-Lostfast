@@ -3,7 +3,7 @@ import Spinner from 'ink-spinner';
 import TextInput from 'ink-text-input';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import type { Lostfast } from '../app/lostfast.js';
+import type { Tradefast } from '../app/tradefast.js';
 import { ChatService } from '../services/chat.js';
 import { COMMANDS, completeCommand, parseCommand, suggestCommands, type CommandSpec } from './commands.js';
 import { OutputLine, type OutputItem } from './output.js';
@@ -16,7 +16,7 @@ import { searchLevelNames, getSearchLevel, type SearchLevelName } from './search
 import { sourceGroupIds, getSourceGroup, resolveSourceIds, DEFAULT_ENABLED_GROUPS, type SourceGroupId } from './sources.js';
 
 export interface AppProps {
-  app: Lostfast;
+  app: Tradefast;
   version: string;
   apiUrl?: string;
   /** When true (first run, no saved mode), the operating-mode popup opens on
@@ -289,7 +289,7 @@ function PlatformSelector({
 /**
  * The interactive shell. A static banner and transcript scroll above a single
  * input line — the same layout as the Gemini CLI. All side effects go through
- * the injected {@link Lostfast} facade; this component only manages UI state.
+ * the injected {@link Tradefast} facade; this component only manages UI state.
  */
 export function App({ app, version, apiUrl, promptOperatingMode }: AppProps): React.ReactElement {
   const { exit } = useApp();
@@ -1045,6 +1045,8 @@ export function App({ app, version, apiUrl, promptOperatingMode }: AppProps): Re
           push({ kind: 'news', report: await app.news((e) => setProgress(e), newsCrawlOptions()) });
         } else if (name === 'status') {
           push({ kind: 'status', status: await app.status() });
+        } else if (name === 'clear-chat') {
+          setHistory([]);
         } else if (name === 'clear') {
           const pruned = await app.clear();
           push({
@@ -1060,7 +1062,7 @@ export function App({ app, version, apiUrl, promptOperatingMode }: AppProps): Re
         setProgress(null);
       }
     },
-    [apiUrl, app, openThemeSelector, openExchangeSelector, openIntervalSelector, openModeSelector, openCurrencySelector, applyMode, applyLevel, applyPlatforms, searchingLevel, enabledPlatforms, newsCrawlOptions, push, quit, theme],
+    [apiUrl, app, openThemeSelector, openExchangeSelector, openIntervalSelector, openModeSelector, openCurrencySelector, applyMode, applyLevel, applyPlatforms, searchingLevel, enabledPlatforms, newsCrawlOptions, push, quit, setHistory, theme],
   );
 
   const onSubmit = useCallback(

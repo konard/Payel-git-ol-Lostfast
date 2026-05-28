@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createDb, type DbHandle } from '../src/db/client.js';
-import { LostfastStore } from '../src/db/store.js';
+import { TradefastStore } from '../src/db/store.js';
 import {
   DEFAULT_NEWS_SOURCES,
   NewsCrawler,
@@ -197,13 +197,13 @@ describe('NewsCrawler', () => {
   });
 });
 
-describe('LostfastStore news persistence', () => {
+describe('TradefastStore news persistence', () => {
   let handle: DbHandle;
-  let store: LostfastStore;
+  let store: TradefastStore;
 
   beforeEach(async () => {
     handle = await createDb({ dataDir: ':memory:' });
-    store = new LostfastStore(handle.db);
+    store = new TradefastStore(handle.db);
   });
 
   afterEach(async () => {

@@ -1,4 +1,4 @@
-import type { LostfastStore } from '../db/store.js';
+import type { TradefastStore } from '../db/store.js';
 import type { NewsSource } from './news-crawler.js';
 
 export interface SourceRating {
@@ -15,7 +15,7 @@ export interface SourceRating {
 }
 
 export class SourceRatingService {
-  constructor(private readonly store: LostfastStore) {}
+  constructor(private readonly store: TradefastStore) {}
 
   async getRating(sourceId: string): Promise<SourceRating | undefined> {
     return this.store.getSourceRating(sourceId);

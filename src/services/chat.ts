@@ -231,7 +231,7 @@ const TOOL_DEFINITIONS: { type: string; function: Record<string, unknown> }[] = 
   },
 ];
 
-const SYSTEM_PROMPT = `Ты — AI-ассистент торговой системы LostFast. Ты можешь отвечать на вопросы пользователя и выполнять команды CLI через инструменты.
+const SYSTEM_PROMPT = `Ты — AI-ассистент торговой системы Tradefast. Ты можешь отвечать на вопросы пользователя и выполнять команды CLI через инструменты.
 
 Доступные инструменты — все команды CLI, а также read-only инструменты для проверки текущих настроек:
 - get_exchange — узнать текущую биржу
@@ -256,9 +256,9 @@ export class ChatService {
   readonly model: string;
 
   constructor() {
-    this.key = process.env.LOSTFAST_AI_API_KEY ?? process.env.ANTHROPIC_API_KEY;
-    this.url = process.env.LOSTFAST_AI_API_URL ?? 'https://api.anthropic.com/v1/messages';
-    this.model = process.env.LOSTFAST_AI_MODEL ?? 'claude-4.7-opus';
+    this.key = process.env.TRADEFAST_AI_API_KEY ?? process.env.ANTHROPIC_API_KEY;
+    this.url = process.env.TRADEFAST_AI_API_URL ?? 'https://api.anthropic.com/v1/messages';
+    this.model = process.env.TRADEFAST_AI_MODEL ?? 'claude-4.7-opus';
   }
 
   get enabled(): boolean {
@@ -267,7 +267,7 @@ export class ChatService {
 
   async chat(message: string, executeTool: ToolExecutor): Promise<string> {
     if (!this.key) {
-      return 'AI не настроен — укажи LOSTFAST_AI_API_KEY в .env';
+      return 'AI не настроен — укажи TRADEFAST_AI_API_KEY в .env';
     }
 
     const messages: ChatMessage[] = [

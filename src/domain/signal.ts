@@ -1,4 +1,4 @@
-/** Identifiers for every strategy shipped with Lostfast. */
+/** Identifiers for every strategy shipped with Tradefast. */
 export type StrategyId =
   | 'trend-following'
   | 'mean-reversion'

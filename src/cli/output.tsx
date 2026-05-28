@@ -1,7 +1,7 @@
 import { Box, Text } from 'ink';
 import React from 'react';
 
-import type { PersistedNewsCrawlReport, StatusReport } from '../app/lostfast.js';
+import type { PersistedNewsCrawlReport, StatusReport } from '../app/tradefast.js';
 import type { RunReport } from '../pipeline/collector.js';
 import type { BacktestReport } from '../services/backtest.js';
 import type { SourceRating } from '../services/source-ratings.js';

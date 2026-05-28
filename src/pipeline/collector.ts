@@ -1,4 +1,4 @@
-import type { LostfastStore, RunKind } from '../db/store.js';
+import type { TradefastStore, RunKind } from '../db/store.js';
 import { DEFAULT_PARAMETERS, type StrategyParameters } from '../domain/signal.js';
 import { AnalyticsService, type SymbolAnalysis } from '../services/analytics.js';
 import { createAdvisor, type AiAdvisor, ValidationAdvisor, type ValidationResult } from '../services/ai-advisor.js';
@@ -63,7 +63,7 @@ export type ProgressListener = (event: ProgressEvent) => void;
  */
 export class CollectionPipeline {
   constructor(
-    private readonly store: LostfastStore,
+    private readonly store: TradefastStore,
     private readonly market: MarketDataSource = createResilientMarketSourceFor(),
     private readonly analytics: AnalyticsService = new AnalyticsService(),
     private readonly search: SearchProvider = new KnowledgeBaseSearch(),
@@ -165,7 +165,7 @@ export class CollectionPipeline {
 
     // --- AI validation (single request with all data) -----------------------
     let validation: ValidationResult | null = null;
-    const hasAiKey = !!(process.env.LOSTFAST_AI_API_KEY ?? process.env.ANTHROPIC_API_KEY);
+    const hasAiKey = !!(process.env.TRADEFAST_AI_API_KEY ?? process.env.ANTHROPIC_API_KEY);
     if (!options.skipAiValidation && hasAiKey && reports.length > 0) {
       emit({ phase: 'advise', message: 'Running AI validation across all symbols…' });
 

@@ -41,6 +41,6 @@ const browser = await chromium.launch();
 const page = await browser.newPage({ deviceScaleFactor: 2 });
 await page.setContent(html, { waitUntil: 'load' });
 const el = await page.$('.term');
-await el.screenshot({ path: new URL('./lostfast-cli.png', import.meta.url).pathname });
+await el.screenshot({ path: new URL('./tradefast-cli.png', import.meta.url).pathname });
 await browser.close();
 console.log('screenshot written');

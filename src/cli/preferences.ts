@@ -9,7 +9,7 @@ import type { ModeName } from './modes.js';
 import type { SearchLevelName } from './search-level.js';
 import type { SourceGroupId } from './sources.js';
 
-const PREF_PATH = join(homedir(), '.lostfast', 'preferences.json');
+const PREF_PATH = join(homedir(), '.tradefast', 'preferences.json');
 
 export interface UserPreferences {
   theme?: ThemeName;

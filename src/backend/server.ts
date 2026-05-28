@@ -5,13 +5,13 @@ import { NestFactory } from '@nestjs/core';
 import { ApolloDriver, type ApolloDriverConfig } from '@nestjs/apollo';
 import { GraphQLModule } from '@nestjs/graphql';
 
-import { LOSTFAST_FACADE, LostfastResolver, type LostfastApiFacade } from './graphql.js';
+import { TRADEFAST_FACADE, TradefastResolver, type TradefastApiFacade } from './graphql.js';
 
 @Module({})
-class LostfastBackendModule {
-  static register(facade: LostfastApiFacade): DynamicModule {
+class TradefastBackendModule {
+  static register(facade: TradefastApiFacade): DynamicModule {
     return {
-      module: LostfastBackendModule,
+      module: TradefastBackendModule,
       imports: [
         GraphQLModule.forRoot<ApolloDriverConfig>({
           driver: ApolloDriver,
@@ -20,28 +20,28 @@ class LostfastBackendModule {
           path: '/graphql',
         }),
       ],
-      providers: [{ provide: LOSTFAST_FACADE, useValue: facade }, LostfastResolver],
+      providers: [{ provide: TRADEFAST_FACADE, useValue: facade }, TradefastResolver],
     };
   }
 }
 
-export interface LostfastBackendOptions {
+export interface TradefastBackendOptions {
   host?: string;
   port?: number;
 }
 
-export interface LostfastBackendHandle {
+export interface TradefastBackendHandle {
   url: string;
   close(): Promise<void>;
 }
 
-export async function startLostfastBackend(
-  facade: LostfastApiFacade,
-  options: LostfastBackendOptions = {},
-): Promise<LostfastBackendHandle> {
+export async function startTradefastBackend(
+  facade: TradefastApiFacade,
+  options: TradefastBackendOptions = {},
+): Promise<TradefastBackendHandle> {
   const host = options.host ?? '127.0.0.1';
   const port = options.port ?? 0;
-  const app = await NestFactory.create(LostfastBackendModule.register(facade), { logger: false });
+  const app = await NestFactory.create(TradefastBackendModule.register(facade), { logger: false });
 
   await app.listen(port, host);
   const baseUrl = (await app.getUrl()).replace(/\/$/u, '');

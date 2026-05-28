@@ -35,7 +35,7 @@ COPY --from=builder /app/drizzle ./drizzle
 
 # PGlite stores its files here when no DATABASE_URL is provided; mount a volume
 # to persist them. Ignored when DATABASE_URL points at a Postgres server.
-ENV LOSTFAST_DATA_DIR=/data/pgdata
+ENV TRADEFAST_DATA_DIR=/data/pgdata
 VOLUME ["/data"]
 
 ENTRYPOINT ["node", "dist/index.js"]

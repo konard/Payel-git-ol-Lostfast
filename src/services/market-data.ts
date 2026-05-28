@@ -58,13 +58,13 @@ function validateCandles(candles: Candle[], symbol: string): void {
   if (last.close < floor) {
     throw new Error(
       `Price too low for ${symbol}: close=${last.close} < floor ${floor}. ` +
-      `Check LOSTFAST_EXCHANGE or use LOSTFAST_MARKET_SOURCE=synthetic for demo mode.`,
+      `Check TRADEFAST_EXCHANGE or use TRADEFAST_MARKET_SOURCE=synthetic for demo mode.`,
     );
   }
   if (last.close > ceiling) {
     throw new Error(
       `Price too high for ${symbol}: close=${last.close} > ceiling ${ceiling}. ` +
-      `Check LOSTFAST_EXCHANGE or use LOSTFAST_MARKET_SOURCE=synthetic for demo mode.`,
+      `Check TRADEFAST_EXCHANGE or use TRADEFAST_MARKET_SOURCE=synthetic for demo mode.`,
     );
   }
 }
@@ -100,7 +100,7 @@ const COINGECKO_IDS: Record<string, string> = {
  */
 export class BinanceMarketData implements MarketDataSource {
   readonly name = 'binance';
-  constructor(private readonly baseUrl = process.env.LOSTFAST_MARKET_API ?? 'https://api.binance.com') {}
+  constructor(private readonly baseUrl = process.env.TRADEFAST_MARKET_API ?? 'https://api.binance.com') {}
 
   async getCandles(symbol: string, interval: string, limit: number): Promise<Candle[]> {
     const url = `${this.baseUrl}/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
@@ -127,7 +127,7 @@ export class CoinGeckoMarketData implements MarketDataSource {
   readonly name = 'coingecko';
 
   constructor(
-    private readonly baseUrl = process.env.LOSTFAST_COINGECKO_API ?? 'https://api.coingecko.com',
+    private readonly baseUrl = process.env.TRADEFAST_COINGECKO_API ?? 'https://api.coingecko.com',
     private readonly vsCurrency = 'usd',
   ) {}
 
@@ -147,7 +147,7 @@ export class CoinGeckoMarketData implements MarketDataSource {
 export class MexcMarketData implements MarketDataSource {
   readonly name = 'mexc';
 
-  constructor(private readonly baseUrl = process.env.LOSTFAST_MEXC_API ?? 'https://api.mexc.com') {}
+  constructor(private readonly baseUrl = process.env.TRADEFAST_MEXC_API ?? 'https://api.mexc.com') {}
 
   async getCandles(symbol: string, interval: string, limit: number): Promise<Candle[]> {
     const iv = toMexcInterval(interval);
@@ -170,7 +170,7 @@ export class MexcMarketData implements MarketDataSource {
 export class BybitMarketData implements MarketDataSource {
   readonly name = 'bybit';
 
-  constructor(private readonly baseUrl = process.env.LOSTFAST_BYBIT_API ?? 'https://api.bybit.com') {}
+  constructor(private readonly baseUrl = process.env.TRADEFAST_BYBIT_API ?? 'https://api.bybit.com') {}
 
   async getCandles(symbol: string, interval: string, limit: number): Promise<Candle[]> {
     const iv = toBybitInterval(interval);
@@ -198,7 +198,7 @@ export class BybitMarketData implements MarketDataSource {
 export class OkxMarketData implements MarketDataSource {
   readonly name = 'okx';
 
-  constructor(private readonly baseUrl = process.env.LOSTFAST_OKX_API ?? 'https://www.okx.com') {}
+  constructor(private readonly baseUrl = process.env.TRADEFAST_OKX_API ?? 'https://www.okx.com') {}
 
   async getCandles(symbol: string, interval: string, limit: number): Promise<Candle[]> {
     const instId = toOkxInstId(symbol);
@@ -236,7 +236,7 @@ export class SyntheticMarketData implements MarketDataSource {
 
   getCandles(symbol: string, interval: string, limit: number): Promise<Candle[]> {
     console.warn(`[SYNTHETIC] Generating fake candles for ${symbol}. ` +
-      `These prices are NOT real market data. Set LOSTFAST_MARKET_SOURCE=resilient and LOSTFAST_EXCHANGE=<exchange>.`);
+      `These prices are NOT real market data. Set TRADEFAST_MARKET_SOURCE=resilient and TRADEFAST_EXCHANGE=<exchange>.`);
     let seed = [...symbol].reduce((acc, ch) => acc + ch.charCodeAt(0), 0) + intervalMinutes(interval);
     const rand = () => {
       seed = (seed * 1103515245 + 12345) & 0x7fffffff;
@@ -335,7 +335,7 @@ function candlesFromSpot(symbol: string, interval: string, limit: number, spot: 
  * IMPORTANT: This class does NOT fall back to synthetic data. If the live
  * source fails (network error, rate limit, bad response) the error is logged
  * and rethrown so the user sees exactly what went wrong. Use
- * `LOSTFAST_MARKET_SOURCE=synthetic` explicitly for demo/offline mode.
+ * `TRADEFAST_MARKET_SOURCE=synthetic` explicitly for demo/offline mode.
  */
 export class ResilientMarketData implements MarketDataSource {
   readonly name = 'resilient';
@@ -359,7 +359,7 @@ export class ResilientMarketData implements MarketDataSource {
 export { MexcMarketData as MexcTickerMarketData };
 
 /**
- * Selects a market source from `LOSTFAST_MARKET_SOURCE`:
+ * Selects a market source from `TRADEFAST_MARKET_SOURCE`:
  *   - `synthetic` → deterministic offline data (great for demos/CI/tests),
  *   - `live`/`binance` → Binance only (fails if unreachable),
  *   - `coingecko` → CoinGecko simple price endpoint,
@@ -367,7 +367,7 @@ export { MexcMarketData as MexcTickerMarketData };
  *   - `resilient` (default) → live with synthetic fallback.
  */
 export function createMarketSource(): MarketDataSource {
-  switch ((process.env.LOSTFAST_MARKET_SOURCE ?? 'resilient').toLowerCase()) {
+  switch ((process.env.TRADEFAST_MARKET_SOURCE ?? 'resilient').toLowerCase()) {
     case 'synthetic':
       return new SyntheticMarketData();
     case 'coingecko':
@@ -401,7 +401,7 @@ export function withPriceValidation(source: MarketDataSource): MarketDataSource 
 /**
  * Creates a live market data source for the given exchange (Binance, Bybit, OKX, MEXC).
  * Falls back to Binance if unknown. This is the preferred way when the user has
- * selected an exchange via /exchange or LOSTFAST_EXCHANGE.
+ * selected an exchange via /exchange or TRADEFAST_EXCHANGE.
  *
  * Prices are validated against realistic floors after every fetch.
  */

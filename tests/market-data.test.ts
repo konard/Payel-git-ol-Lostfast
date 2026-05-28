@@ -48,10 +48,10 @@ describe('spot-price market data sources', () => {
   });
 
   it('selects CoinGecko and MEXC sources from configuration', () => {
-    vi.stubEnv('LOSTFAST_MARKET_SOURCE', 'coingecko');
+    vi.stubEnv('TRADEFAST_MARKET_SOURCE', 'coingecko');
     expect(createMarketSource()).toBeInstanceOf(CoinGeckoMarketData);
 
-    vi.stubEnv('LOSTFAST_MARKET_SOURCE', 'mexc');
+    vi.stubEnv('TRADEFAST_MARKET_SOURCE', 'mexc');
     expect(createMarketSource()).toBeInstanceOf(MexcTickerMarketData);
   });
 });

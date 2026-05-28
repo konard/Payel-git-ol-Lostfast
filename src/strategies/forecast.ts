@@ -9,7 +9,7 @@ import type { SymbolAnalysis } from '../services/analytics.js';
 export const REWARD_RISK_RATIO = 2;
 
 /**
- * The concrete trade Lostfast suggests for a symbol: a direction, an entry, and
+ * The concrete trade Tradefast suggests for a symbol: a direction, an entry, and
  * the two bracket levels (take-profit and stop-loss). `direction` is the empty
  * string when no risk-approved directional signal exists, in which case the
  * bracket levels are null.

@@ -48,11 +48,11 @@ export interface ValidationInput {
 // --- Helpers ---------------------------------------------------------------
 
 function apiKey(): string | undefined {
-  return process.env.LOSTFAST_AI_API_KEY ?? process.env.ANTHROPIC_API_KEY;
+  return process.env.TRADEFAST_AI_API_KEY ?? process.env.ANTHROPIC_API_KEY;
 }
 
 function apiUrl(): string {
-  return process.env.LOSTFAST_AI_API_URL ?? 'https://api.anthropic.com/v1/messages';
+  return process.env.TRADEFAST_AI_API_URL ?? 'https://api.anthropic.com/v1/messages';
 }
 
 function isOpenAiCompatible(url: string): boolean {
@@ -155,7 +155,7 @@ export class LlmAdvisor implements AiAdvisor {
   constructor(
     private readonly key = apiKey(),
     private readonly url = apiUrl(),
-    model = process.env.LOSTFAST_AI_MODEL ?? 'claude-4.7-opus',
+    model = process.env.TRADEFAST_AI_MODEL ?? 'claude-4.7-opus',
   ) {
     this.model = model;
   }
@@ -193,7 +193,7 @@ function buildPrompt(analysis: SymbolAnalysis): string {
 
 // --- Correction advisor (single request, all data) --------------------------
 
-const CORRECTION_SYSTEM_PROMPT = `Ты — корректирующий слой торговой системы LostFast. Твоя задача — проверить и исправить TP/SL/направление для каждого символа за один запрос.
+const CORRECTION_SYSTEM_PROMPT = `Ты — корректирующий слой торговой системы Tradefast. Твоя задача — проверить и исправить TP/SL/направление для каждого символа за один запрос.
 
 Правила:
 1. **tpCorrect** — верен ли TP (2:1 риск-доходность, относительно ATR). Если нет — укажи correctedTp.
@@ -261,7 +261,7 @@ export class ValidationAdvisor {
   constructor(
     private readonly key = apiKey(),
     private readonly url = apiUrl(),
-    model = process.env.LOSTFAST_AI_MODEL ?? 'claude-4.7-opus',
+    model = process.env.TRADEFAST_AI_MODEL ?? 'claude-4.7-opus',
   ) {
     this.model = model;
   }

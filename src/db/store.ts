@@ -4,7 +4,7 @@ import type { Candle } from '../domain/candle.js';
 import type { NewsItem } from '../services/news-crawler.js';
 import type { InstrumentConsensus } from '../services/news-consensus.js';
 import { newsConsensus } from './schema.js';
-import type { LostfastDb } from './client.js';
+import type { TradefastDb } from './client.js';
 import {
   aiInsights,
   analytics,
@@ -54,8 +54,8 @@ export interface AnalyticsRow {
  *  - `/clear`  → {@link pruneOutdated} drops everything but the latest run and
  *                the general `search_results` table.
  */
-export class LostfastStore {
-  constructor(private readonly db: LostfastDb) {}
+export class TradefastStore {
+  constructor(private readonly db: TradefastDb) {}
 
   // --- Run lifecycle -------------------------------------------------------
 

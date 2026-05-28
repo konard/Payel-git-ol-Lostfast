@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { LostfastResolver, type LostfastApiFacade } from '../src/backend/graphql.js';
-import { startLostfastBackend } from '../src/backend/server.js';
+import { TradefastResolver, type TradefastApiFacade } from '../src/backend/graphql.js';
+import { startTradefastBackend } from '../src/backend/server.js';
 
-const facade: LostfastApiFacade = {
+const facade: TradefastApiFacade = {
   driver: 'pglite',
   strategies: () => [{ id: 'trend-following', title: 'Trend Following' }],
   status: async () => ({
@@ -42,8 +42,8 @@ const facade: LostfastApiFacade = {
 };
 
 describe('Nest GraphQL resolver', () => {
-  it('maps Lostfast status and strategies into GraphQL DTOs', async () => {
-    const resolver = new LostfastResolver(facade);
+  it('maps Tradefast status and strategies into GraphQL DTOs', async () => {
+    const resolver = new TradefastResolver(facade);
 
     await expect(resolver.strategies()).resolves.toEqual([{ id: 'trend-following', title: 'Trend Following' }]);
     await expect(resolver.status()).resolves.toMatchObject({
@@ -58,7 +58,7 @@ describe('Nest GraphQL resolver', () => {
   });
 
   it('exposes start, update, and clear mutations', async () => {
-    const resolver = new LostfastResolver(facade);
+    const resolver = new TradefastResolver(facade);
 
     await expect(resolver.start()).resolves.toMatchObject({ runId: 2, kind: 'start' });
     await expect(resolver.update()).resolves.toMatchObject({ runId: 3, kind: 'update' });
@@ -66,7 +66,7 @@ describe('Nest GraphQL resolver', () => {
   });
 
   it('serves the GraphQL schema over HTTP', async () => {
-    const backend = await startLostfastBackend(facade);
+    const backend = await startTradefastBackend(facade);
 
     try {
       const response = await fetch(backend.url, {

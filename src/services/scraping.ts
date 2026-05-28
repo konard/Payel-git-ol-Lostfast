@@ -20,7 +20,7 @@ const sha256 = (value: string): string => createHash('sha256').update(value).dig
  * Headless scraper backed by Playwright/Chromium. Chromium is loaded lazily and
  * only when a browser is actually needed, so installing the binary is optional:
  * environments without it can still run every other command. The page text is
- * hashed so {@link LostfastStore.saveScrape} can skip unchanged content.
+ * hashed so {@link TradefastStore.saveScrape} can skip unchanged content.
  */
 export class PlaywrightScraper implements Scraper {
   readonly name = 'playwright';
@@ -89,13 +89,13 @@ export class ResilientScraper implements Scraper {
 }
 
 /**
- * Returns a scraper when `LOSTFAST_SCRAPE` is enabled, otherwise `null`. Launching
+ * Returns a scraper when `TRADEFAST_SCRAPE` is enabled, otherwise `null`. Launching
  * a headless browser is comparatively heavy and needs the Chromium binary, so it
  * is opt-in: `/start` stays fast and fully offline by default, and the scraping
- * pillar activates on demand with `LOSTFAST_SCRAPE=1`.
+ * pillar activates on demand with `TRADEFAST_SCRAPE=1`.
  */
 export function createScraper(): Scraper | null {
-  const flag = (process.env.LOSTFAST_SCRAPE ?? '').toLowerCase();
+  const flag = (process.env.TRADEFAST_SCRAPE ?? '').toLowerCase();
   if (flag === '1' || flag === 'true' || flag === 'on') return new ResilientScraper();
   const num = Number(flag);
   return Number.isFinite(num) && num > 0 ? new ResilientScraper() : null;

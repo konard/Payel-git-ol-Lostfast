@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { createDb, type DbHandle } from '../src/db/client.js';
-import { LostfastStore } from '../src/db/store.js';
+import { TradefastStore } from '../src/db/store.js';
 import { CollectionPipeline } from '../src/pipeline/collector.js';
 import { AnalyticsService } from '../src/services/analytics.js';
 import { HeuristicAdvisor } from '../src/services/ai-advisor.js';
@@ -11,12 +11,12 @@ import type { Scraper, ScrapeResult } from '../src/services/scraping.js';
 
 describe('CollectionPipeline (offline doubles)', () => {
   let handle: DbHandle;
-  let store: LostfastStore;
+  let store: TradefastStore;
   let pipeline: CollectionPipeline;
 
   beforeEach(async () => {
     handle = await createDb({ dataDir: ':memory:' });
-    store = new LostfastStore(handle.db);
+    store = new TradefastStore(handle.db);
     pipeline = new CollectionPipeline(
       store,
       new SyntheticMarketData(),

@@ -3,7 +3,7 @@ import { writeFileSync } from 'node:fs';
 import { render } from 'ink-testing-library';
 import React from 'react';
 
-import type { Lostfast } from '../src/app/lostfast.js';
+import type { Tradefast } from '../src/app/tradefast.js';
 import { App } from '../src/cli/App.js';
 
 const app = {
@@ -21,7 +21,7 @@ const app = {
   },
   close: async () => {},
   strategies: () => [],
-} as unknown as Lostfast;
+} as unknown as Tradefast;
 
 const { lastFrame, stdin, unmount } = render(
   <App app={app} version="0.2.0" apiUrl="http://127.0.0.1:8787/graphql" />,

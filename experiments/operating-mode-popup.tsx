@@ -5,7 +5,7 @@
 import React from 'react';
 import { render } from 'ink-testing-library';
 
-import type { Lostfast } from '../src/app/lostfast.js';
+import type { Tradefast } from '../src/app/tradefast.js';
 import { App } from '../src/cli/App.js';
 
 const fakeApp = {
@@ -28,7 +28,7 @@ const fakeApp = {
   setInterval: () => {},
   setMode: () => {},
   strategies: () => [],
-} as unknown as Lostfast;
+} as unknown as Tradefast;
 
 async function main(): Promise<void> {
   const tallStdout = { rows: 80, columns: 110, write: () => {}, on: () => {}, removeListener: () => {} } as any;

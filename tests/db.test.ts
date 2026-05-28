@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { createDb, type DbHandle } from '../src/db/client.js';
-import { LostfastStore } from '../src/db/store.js';
+import { TradefastStore } from '../src/db/store.js';
 import type { Candle } from '../src/domain/candle.js';
 
 const candle = (t: number, close: number): Candle => ({
@@ -13,13 +13,13 @@ const candle = (t: number, close: number): Candle => ({
   volume: 100,
 });
 
-describe('LostfastStore (PGlite in-memory)', () => {
+describe('TradefastStore (PGlite in-memory)', () => {
   let handle: DbHandle;
-  let store: LostfastStore;
+  let store: TradefastStore;
 
   beforeEach(async () => {
     handle = await createDb({ dataDir: ':memory:' });
-    store = new LostfastStore(handle.db);
+    store = new TradefastStore(handle.db);
   });
 
   afterEach(async () => {

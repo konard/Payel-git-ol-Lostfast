@@ -1,12 +1,12 @@
 import { Inject } from '@nestjs/common';
 import { Field, Float, Int, Mutation, ObjectType, Query, Resolver } from '@nestjs/graphql';
 
-import type { StatusReport } from '../app/lostfast.js';
+import type { StatusReport } from '../app/tradefast.js';
 import type { RunReport } from '../pipeline/collector.js';
 
-export const LOSTFAST_FACADE = Symbol('LOSTFAST_FACADE');
+export const TRADEFAST_FACADE = Symbol('TRADEFAST_FACADE');
 
-export interface LostfastApiFacade {
+export interface TradefastApiFacade {
   readonly driver: string;
   status(): Promise<StatusReport>;
   strategies(): { id: string; title: string }[];
@@ -121,12 +121,12 @@ export class RunReportDto {
 }
 
 @Resolver()
-export class LostfastResolver {
-  constructor(@Inject(LOSTFAST_FACADE) private readonly lostfast: LostfastApiFacade) {}
+export class TradefastResolver {
+  constructor(@Inject(TRADEFAST_FACADE) private readonly tradefast: TradefastApiFacade) {}
 
   @Query(() => StatusDto)
   async status(): Promise<StatusDto> {
-    const status = await this.lostfast.status();
+    const status = await this.tradefast.status();
     return {
       driver: status.driver,
       counts: Object.entries(status.counts).map(([name, count]) => ({ name, count })),
@@ -147,22 +147,22 @@ export class LostfastResolver {
 
   @Query(() => [StrategyDto])
   async strategies(): Promise<StrategyDto[]> {
-    return this.lostfast.strategies();
+    return this.tradefast.strategies();
   }
 
   @Mutation(() => RunReportDto)
   async start(): Promise<RunReportDto> {
-    return toRunDto(await this.lostfast.start());
+    return toRunDto(await this.tradefast.start());
   }
 
   @Mutation(() => RunReportDto)
   async update(): Promise<RunReportDto> {
-    return toRunDto(await this.lostfast.update());
+    return toRunDto(await this.tradefast.update());
   }
 
   @Mutation(() => Int)
   async clear(): Promise<number> {
-    return this.lostfast.clear();
+    return this.tradefast.clear();
   }
 }
 

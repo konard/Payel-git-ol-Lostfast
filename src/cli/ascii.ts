@@ -35,7 +35,7 @@ const glyphLines = (g: Glyph): string[] =>
   Array.isArray(g) ? g : figlet.textSync(g, { font: 'ANSI Shadow' }).split('\n');
 
 /**
- * Builds the multi-line "LØSTFΛST" block banner by laying every glyph side by
+ * Builds the multi-line "TRADEFΛST" block banner by laying every glyph side by
  * side, preserving each glyph's native width. Returns the raw (uncoloured) art;
  * the gradient is applied by the renderer.
  */

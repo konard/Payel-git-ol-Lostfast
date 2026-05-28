@@ -125,7 +125,7 @@ const sha256 = (value: string): string => createHash('sha256').update(value).dig
 
 export const DEFAULT_NEWS_SOURCES: NewsSource[] = validateNewsSources(configuredNewsSources);
 
-export async function loadNewsSources(file = process.env.LOSTFAST_NEWS_SOURCES_FILE): Promise<NewsSource[]> {
+export async function loadNewsSources(file = process.env.TRADEFAST_NEWS_SOURCES_FILE): Promise<NewsSource[]> {
   if (!file) return DEFAULT_NEWS_SOURCES.map((source) => ({ ...source }));
   const parsed = JSON.parse(await readFile(file, 'utf8')) as unknown;
   return validateNewsSources(parsed);
@@ -135,10 +135,10 @@ export async function createNewsCrawler(): Promise<NewsCrawler> {
   const sources = await loadNewsSources();
   const fetcher = await detectPlaywrightFetcher();
   return new NewsCrawler(sources, fetcher, {
-    maxItemsPerSource: envNumber('LOSTFAST_NEWS_LIMIT', DEFAULT_MAX_ITEMS_PER_SOURCE),
-    maxDepth: envNonNegativeInteger('LOSTFAST_NEWS_DEPTH', DEFAULT_MAX_DEPTH),
-    maxPagesPerSource: envNumber('LOSTFAST_NEWS_PAGE_LIMIT', DEFAULT_MAX_PAGES_PER_SOURCE),
-    maxLinksPerPage: envNumber('LOSTFAST_NEWS_LINKS_PER_PAGE', DEFAULT_MAX_LINKS_PER_PAGE),
+    maxItemsPerSource: envNumber('TRADEFAST_NEWS_LIMIT', DEFAULT_MAX_ITEMS_PER_SOURCE),
+    maxDepth: envNonNegativeInteger('TRADEFAST_NEWS_DEPTH', DEFAULT_MAX_DEPTH),
+    maxPagesPerSource: envNumber('TRADEFAST_NEWS_PAGE_LIMIT', DEFAULT_MAX_PAGES_PER_SOURCE),
+    maxLinksPerPage: envNumber('TRADEFAST_NEWS_LINKS_PER_PAGE', DEFAULT_MAX_LINKS_PER_PAGE),
   });
 }
 
@@ -283,7 +283,7 @@ export class PlaywrightNewsPageFetcher implements NewsPageFetcher {
     try {
       await page.setExtraHTTPHeaders({
         'accept-language': 'ru,en;q=0.9',
-        'user-agent': 'LostfastNewsCrawler/0.2 (+https://github.com/Payel-git-ol/Lostfast)',
+        'user-agent': 'TradefastNewsCrawler/0.2 (+https://github.com/Payel-git-ol/Tradefast)',
       });
       await page.goto(source.url, { waitUntil: 'domcontentloaded', timeout: options.timeoutMs });
       await page.waitForLoadState('networkidle', { timeout: Math.min(options.timeoutMs, 5_000) }).catch(() => {});
@@ -344,7 +344,7 @@ export class HttpNewsPageFetcher implements NewsPageFetcher {
         signal: controller.signal,
         headers: {
           'accept-language': 'ru,en;q=0.9',
-          'user-agent': 'LostfastNewsCrawler/0.2 (+https://github.com/Payel-git-ol/Lostfast)',
+          'user-agent': 'TradefastNewsCrawler/0.2 (+https://github.com/Payel-git-ol/Tradefast)',
         },
       });
       const html = await response.text();
