@@ -133,12 +133,23 @@ export async function loadNewsSources(file = process.env.LOSTFAST_NEWS_SOURCES_F
 
 export async function createNewsCrawler(): Promise<NewsCrawler> {
   const sources = await loadNewsSources();
-  return new NewsCrawler(sources, new PlaywrightNewsPageFetcher(), {
+  const fetcher = await detectPlaywrightFetcher();
+  return new NewsCrawler(sources, fetcher, {
     maxItemsPerSource: envNumber('LOSTFAST_NEWS_LIMIT', DEFAULT_MAX_ITEMS_PER_SOURCE),
     maxDepth: envNonNegativeInteger('LOSTFAST_NEWS_DEPTH', DEFAULT_MAX_DEPTH),
     maxPagesPerSource: envNumber('LOSTFAST_NEWS_PAGE_LIMIT', DEFAULT_MAX_PAGES_PER_SOURCE),
     maxLinksPerPage: envNumber('LOSTFAST_NEWS_LINKS_PER_PAGE', DEFAULT_MAX_LINKS_PER_PAGE),
   });
+}
+
+async function detectPlaywrightFetcher(): Promise<NewsPageFetcher> {
+  try {
+    const { chromium } = await import('playwright');
+    chromium.executablePath();
+    return new PlaywrightNewsPageFetcher();
+  } catch {
+    return new HttpNewsPageFetcher();
+  }
 }
 
 export class NewsCrawler {
@@ -314,6 +325,89 @@ export class PlaywrightNewsPageFetcher implements NewsPageFetcher {
     this.browser = await chromium.launch({ headless: true });
     return this.browser;
   }
+}
+
+/**
+ * HTTP-based fallback page fetcher that uses plain fetch() + regex HTML
+ * parsing. Activated when Playwright Chromium is not installed.
+ * Does not execute JavaScript (no scrolling, no dynamic content), but can
+ * extract titles and links from static HTML pages.
+ */
+export class HttpNewsPageFetcher implements NewsPageFetcher {
+  readonly name = 'http-fallback';
+
+  async fetch(source: NewsSource, options: NewsFetchOptions): Promise<NewsPageSnapshot> {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), options.timeoutMs);
+    try {
+      const response = await fetch(source.url, {
+        signal: controller.signal,
+        headers: {
+          'accept-language': 'ru,en;q=0.9',
+          'user-agent': 'LostfastNewsCrawler/0.2 (+https://github.com/Payel-git-ol/Lostfast)',
+        },
+      });
+      const html = await response.text();
+      const pageTitle = extractTitleFromHtml(html) ?? source.title;
+      const candidates: NewsCandidate[] = extractCandidatesFromHtml(html, source.url, options.maxCandidates);
+      return { pageTitle, candidates };
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  async close(): Promise<void> {}
+}
+
+function extractTitleFromHtml(html: string): string | undefined {
+  const match = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(html);
+  if (!match) return undefined;
+  return match[1].replace(/\s+/g, ' ').trim();
+}
+
+function extractCandidatesFromHtml(html: string, baseUrl: string, maxCandidates: number): NewsCandidate[] {
+  const candidates: NewsCandidate[] = [];
+  const seen = new Set<string>();
+
+  const push = (title: string, url?: string, summary?: string, publishedAt?: string) => {
+    const t = title.replace(/\s+/g, ' ').trim();
+    if (!t || t.length < 8) return;
+    const key = `${url ?? ''}\n${t.toLowerCase()}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    candidates.push({ title: t, url, summary, publishedAt });
+  };
+
+  // Try meta tags first
+  const ogTitle = /<meta[^>]+property\s*=\s*["']og:title["'][^>]+content\s*=\s*["']([^"']*)["'][^>]*>/i.exec(html);
+  const ogUrl = /<meta[^>]+property\s*=\s*["']og:url["'][^>]+content\s*=\s*["']([^"']*)["'][^>]*>/i.exec(html);
+  const ogDesc = /<meta[^>]+property\s*=\s*["']og:description["'][^>]+content\s*=\s*["']([^"']*)["'][^>]*>/i.exec(html);
+  const canonical = /<link[^>]+rel\s*=\s*["']canonical["'][^>]+href\s*=\s*["']([^"']*)["'][^>]*>/i.exec(html);
+  const currentTitle = ogTitle?.[1] ?? extractTitleFromHtml(html);
+  if (currentTitle) {
+    let url: string;
+    try { url = new URL(canonical?.[1] ?? ogUrl?.[1] ?? '', baseUrl).toString(); } catch { url = baseUrl; }
+    push(currentTitle, url, ogDesc?.[1]);
+  }
+
+  // Extract <a> links
+  const linkRegex = /<a\s+[^>]*href\s*=\s*["']([^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi;
+  let match: RegExpExecArray | null;
+  const linkCandidates: { href: string; text: string; container: string }[] = [];
+  while ((match = linkRegex.exec(html)) !== null && linkCandidates.length < maxCandidates * 3) {
+    let href: string;
+    try { href = new URL(match[1], baseUrl).toString(); } catch { continue; }
+    const text = match[2].replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+    if (!text || text.length < 8) continue;
+    linkCandidates.push({ href, text, container: '' });
+  }
+
+  for (const link of linkCandidates) {
+    if (candidates.length >= maxCandidates) break;
+    push(link.text, link.href);
+  }
+
+  return candidates.slice(0, maxCandidates);
 }
 
 function normalizeCandidates(
